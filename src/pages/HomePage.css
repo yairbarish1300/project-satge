@@ -1,0 +1,50 @@
+@import './PageBase.css';
+
+.rp-hero {
+	text-align: center;
+	padding: 48px 0;
+}
+
+.rp-hero-badge {
+	color: #4be277;
+	font-size: 12px;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	font-family: 'JetBrains Mono', monospace;
+}
+
+.rp-hero h1 {
+	margin: 12px 0;
+	font-size: 48px;
+	line-height: 1.1;
+}
+
+.rp-hero p {
+	color: #bccbb9;
+	max-width: 900px;
+	margin: 0 auto;
+	line-height: 1.6;
+}
+
+.rp-grid-3 {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 16px;
+}
+
+.rp-hero img,
+.rp-product-card {
+	width: 100%;
+}
+
+@media (max-width: 1000px) {
+	.rp-grid-3 {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 680px) {
+	.rp-grid-3 {
+		grid-template-columns: 1fr;
+	}
+}

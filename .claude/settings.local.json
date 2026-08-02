@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(timeout 12 npx vite build)",
+      "Bash(timeout 15 npx vite build)",
+      "Bash(command -v chromium-cli)",
+      "Bash(command -v npm)",
+      "Bash(npm run *)",
+      "Bash(echo \"started with PID $!\")",
+      "Bash(curl -sI http://localhost:4178/)",
+      "Bash(tasklist //FI \"IMAGENAME eq node.exe\")",
+      "Bash(gh auth *)",
+      "PowerShell(gh auth status 2>&1)",
+      "Bash(git config *)",
+      "Bash(git init *)",
+      "Bash(git add *)"
+    ]
+  }
+}

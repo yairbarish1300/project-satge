@@ -1,0 +1,134 @@
+@import './PageBase.css';
+
+.rp-login-shell {
+	position: relative;
+	min-height: 100vh;
+	display: grid;
+	place-items: center;
+	background: #000;
+	color: #e5e2e1;
+	direction: rtl;
+	padding: 24px;
+}
+
+.rp-login-box {
+	width: 100%;
+	max-width: 420px;
+	background: rgba(18, 18, 18, 0.85);
+	border: 1px solid #262626;
+	border-radius: 14px;
+	padding: 28px;
+	box-shadow: 0 0 20px rgba(34, 197, 94, 0.15);
+}
+
+.rp-login-head {
+	text-align: center;
+	margin-bottom: 18px;
+}
+
+.rp-login-head h1 {
+	margin: 0;
+	font-size: 28px;
+	color: #4be277;
+	letter-spacing: -0.02em;
+}
+
+.rp-login-head p {
+	margin: 8px 0 0;
+	color: #bccbb9;
+}
+
+.rp-field {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-bottom: 14px;
+}
+
+.rp-field label {
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: #bccbb9;
+	font-family: 'JetBrains Mono', monospace;
+}
+
+.rp-login-actions {
+	display: flex;
+	justify-content: center;
+	margin-top: 10px;
+}
+
+.rp-login-links {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 2px;
+	margin-bottom: 8px;
+}
+
+.rp-login-link {
+	color: #adc6ff;
+	text-decoration: none;
+	font-size: 12px;
+	font-family: 'JetBrains Mono', monospace;
+	letter-spacing: 0.04em;
+}
+
+.rp-login-link:hover {
+	color: #4be277;
+	text-decoration: underline;
+}
+
+.rp-login-btn {
+	background: #4be277;
+	color: #003915;
+	border: none;
+	border-radius: 8px;
+	padding: 10px 16px;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.rp-login-btn:hover {
+	filter: brightness(1.06);
+}
+
+.rp-back-home-btn {
+	position: fixed;
+	top: 14px;
+	left: 14px;
+	z-index: 10;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	background: transparent;
+	border: none;
+	padding: 4px 6px;
+	color: #4be277;
+	font-weight: 700;
+	font-size: 12px;
+	cursor: pointer;
+	transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.rp-back-home-btn:hover {
+	color: #79f09c;
+	transform: translateX(-2px);
+}
+
+.rp-back-arrow {
+	color: #4be277;
+	font-size: 13px;
+	font-family: 'JetBrains Mono', monospace;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	line-height: 1;
+	display: inline-block;
+	animation: rpArrowShift 1s ease-in-out infinite alternate;
+}
+
+@keyframes rpArrowShift {
+	from { transform: translateX(-2px); }
+	to { transform: translateX(2px); }
+}

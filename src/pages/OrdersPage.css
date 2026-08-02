@@ -1,0 +1,143 @@
+@import './AdminCommon.css';
+
+.orders-bottom {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.orders-activity,
+.orders-filters {
+  background: #1c1b1b;
+  border: 1px solid #353534;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.orders-activity-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.orders-activity-head h3,
+.orders-filters h3 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.orders-view-log {
+  color: #4be277;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.orders-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.orders-activity-item {
+  display: flex;
+  gap: 16px;
+}
+
+.orders-activity-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.orders-activity-icon.activity-green { background: rgba(75, 226, 119, 0.1); color: #4be277; }
+.orders-activity-icon.activity-blue { background: rgba(173, 198, 255, 0.1); color: #adc6ff; }
+.orders-activity-icon.activity-orange { background: rgba(255, 139, 124, 0.1); color: #ff8b7c; }
+
+.orders-activity-item p {
+  margin: 0;
+  color: #bccbb9;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.orders-activity-meta {
+  margin-top: 4px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.orders-filters {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%), #1c1b1b;
+}
+
+.orders-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.orders-chip {
+  padding: 8px 16px;
+  background: #2a2a2a;
+  border: 1px solid #353534;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #e5e2e1;
+  cursor: pointer;
+}
+
+.orders-chip:hover { border-color: #4be277; }
+
+.orders-export {
+  margin-top: 32px;
+  padding-top: 32px;
+  border-top: 1px solid #353534;
+}
+
+.orders-export p {
+  margin: 0 0 16px;
+  color: #bccbb9;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.orders-export-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.orders-export-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 0;
+  background: #201f1f;
+  border: 1px solid #353534;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #e5e2e1;
+  cursor: pointer;
+}
+
+.orders-export-btn:hover { background: #353534; }
+
+@media (max-width: 1200px) {
+  .orders-bottom { grid-template-columns: 1fr; }
+}
