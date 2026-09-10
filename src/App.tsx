@@ -7,6 +7,10 @@ import CheckoutPage from './pages/CheckoutPage';
 import OrdersPage from './pages/OrdersPage';
 import ProductPage from './pages/ProductPage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import EmployeesPage from './pages/EmployeesPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './context/AuthContext';
 import { ProductCatalogProvider } from './context/ProductCatalogContext';
 import { CategoryTreeProvider } from './context/CategoryTreeContext';
 
@@ -16,10 +20,40 @@ function AppLayout() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/shop" element={<ShopPage />} />
-        <Route path="/inventory" element={<InventoryPage />} />
-        <Route path="/orders" element={<OrdersPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/inventory"
+          element={
+            <ProtectedRoute>
+              <InventoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <OrdersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/employees"
+          element={
+            <ProtectedRoute requiredRole="manager">
+              <EmployeesPage />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/product" element={<ProductPage />} />
         <Route path="*" element={<HomePage />} />
@@ -30,10 +64,12 @@ function AppLayout() {
 
 export default function App() {
   return (
-    <CategoryTreeProvider>
-      <ProductCatalogProvider>
-        <AppLayout />
-      </ProductCatalogProvider>
-    </CategoryTreeProvider>
+    <AuthProvider>
+      <CategoryTreeProvider>
+        <ProductCatalogProvider>
+          <AppLayout />
+        </ProductCatalogProvider>
+      </CategoryTreeProvider>
+    </AuthProvider>
   );
 }

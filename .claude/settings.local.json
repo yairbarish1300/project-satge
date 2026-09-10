@@ -20,7 +20,35 @@
       "Bash(git commit *)",
       "Bash(git remote *)",
       "Bash(git branch *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(npx --no-install playwright --version)",
+      "Read(//c/Users/yairb/AppData/Local/Temp/claude/bundled-skills/2.1.263//**)",
+      "PowerShell(Start-Process \"http://localhost:4178\")",
+      "Bash(npm --version)",
+      "Bash(command -v mongod)",
+      "Bash(command -v docker)",
+      "Bash(mkdir -p \"/c/Users/yairb/OneDrive/שולחן העבודה/stage web project/server/models\" \"/c/Users/yairb/OneDrive/שולחן העבודה/stage web project/server/routes\" \"/c/Users/yairb/OneDrive/שולחן העבודה/stage web project/server/middleware\")",
+      "Bash(npm install *)",
+      "Bash(curl -s http://localhost:4178/src/pages/RegisterPage.tsx -o /dev/null -w \"RegisterPage.tsx: %{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:4178/src/pages/EmployeesPage.tsx -o /dev/null -w \"EmployeesPage.tsx: %{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:4178 -o /dev/null -w \"home: %{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:4178/src/pages/EmployeesPage.tsx)",
+      "Bash(node server/__smoke_test.mjs)",
+      "Bash(timeout 90 node -e ' *)",
+      "Bash(MONGODB_URI=\"mongodb://127.0.0.1:53758/stage-test\" JWT_SECRET=\"test\" PORT=5099 timeout 15 node server/index.js)",
+      "Bash(taskkill //F //PID 1208)",
+      "Bash(rm -f server/__smoke_test.mjs server/__start_memdb.mjs)",
+      "Bash(npm uninstall *)",
+      "Bash(echo \"tsc exit: $?\")",
+      "Bash(curl -s http://localhost:4178/register -o /dev/null -w \"register page http: %{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:4178 -o /dev/null -w \"home http: %{http_code}\\\\n\")",
+      "PowerShell(Start-Process \"http://localhost:4178/register\")",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
+      "Bash(curl -s http://localhost:5050/api/health)",
+      "Bash(curl -s -o /dev/null -w \"frontend: %{http_code}\\\\n\" http://localhost:4178)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\yairb\\OneDrive\\שולחן העבודה\\stage web project\\server"
     ]
   }
 }

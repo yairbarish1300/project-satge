@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AddProductPanel from './AddProductPanel';
+import { useAuth } from '../context/AuthContext';
 
-type AdminSection = 'inventory' | 'orders' | 'dashboard';
+type AdminSection = 'inventory' | 'orders' | 'dashboard' | 'employees';
 
 type AdminSidebarProps = {
   active: AdminSection;
@@ -13,7 +14,13 @@ const AVATAR_DATA_URI =
 
 export default function AdminSidebar({ active }: AdminSidebarProps) {
   const navigate = useNavigate();
+  const { user, isManager, logout } = useAuth();
   const [isAddPanelOpen, setIsAddPanelOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <aside className="admin-sidebar">
@@ -35,6 +42,12 @@ export default function AdminSidebar({ active }: AdminSidebarProps) {
           <span className="msym">edit_calendar</span>
           <span>Manage Products</span>
         </div>
+        {isManager && (
+          <div className={`admin-nav-item ${active === 'employees' ? 'active' : ''}`} onClick={() => navigate('/employees')}>
+            <span className="msym">group</span>
+            <span>ניהול עובדים</span>
+          </div>
+        )}
       </nav>
 
       <div className="admin-cta-wrap">
@@ -47,12 +60,12 @@ export default function AdminSidebar({ active }: AdminSidebarProps) {
             <img src={AVATAR_DATA_URI} alt="Admin" />
           </div>
           <div>
-            <p className="admin-user-name">Admin User</p>
-            <p className="admin-user-role">Master Access</p>
+            <p className="admin-user-name">{user?.fullName ?? 'Admin User'}</p>
+            <p className="admin-user-role">{isManager ? 'Master Access' : 'Employee Access'}</p>
           </div>
         </div>
         <div className="admin-user-action"><span className="msym">settings</span><span>Settings</span></div>
-        <div className="admin-user-action" onClick={() => navigate('/login')}><span className="msym">logout</span><span>Logout</span></div>
+        <div className="admin-user-action" onClick={handleLogout}><span className="msym">logout</span><span>Logout</span></div>
       </div>
 
       <AddProductPanel open={isAddPanelOpen} onClose={() => setIsAddPanelOpen(false)} />

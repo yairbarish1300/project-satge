@@ -6,9 +6,18 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 4178 --strictPort",
     "build": "tsc -b && vite build",
-    "preview": "vite preview --host 0.0.0.0 --port 4178 --strictPort"
+    "preview": "vite preview --host 0.0.0.0 --port 4178 --strictPort",
+    "server": "node server/index.js",
+    "server:dev": "node --watch server/index.js",
+    "dev:all": "concurrently -n API,WEB -c green,cyan \"npm:server:dev\" \"npm:dev\""
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.8.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0"
@@ -17,6 +26,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.0",
     "typescript": "^5.6.3",
     "vite": "^5.4.10"
   }

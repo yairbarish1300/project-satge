@@ -94,6 +94,40 @@
 	filter: brightness(1.06);
 }
 
+.rp-login-btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+	filter: none;
+}
+
+.rp-checkbox-field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 14px;
+	color: #bccbb9;
+	font-size: 13px;
+	cursor: pointer;
+}
+
+.rp-checkbox-field input {
+	width: 16px;
+	height: 16px;
+	accent-color: #4be277;
+	cursor: pointer;
+}
+
+.rp-error {
+	margin: 0 0 14px;
+	padding: 8px 12px;
+	border-radius: 8px;
+	background: rgba(255, 139, 124, 0.1);
+	border: 1px solid rgba(255, 139, 124, 0.3);
+	color: #ff8b7c;
+	font-size: 13px;
+	text-align: center;
+}
+
 .rp-back-home-btn {
 	position: fixed;
 	top: 14px;
