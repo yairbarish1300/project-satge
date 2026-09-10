@@ -1,5 +1,3 @@
-import type { AdminStat } from '../admin/StatsGrid';
-
 export interface DashboardAction {
   id: number;
   icon: string;
@@ -15,18 +13,13 @@ export const ACTIONS: DashboardAction[] = [
   { id: 3, icon: 'edit_calendar', title: 'הוספה ועדכון מוצרים', desc: 'הזנת ציוד חדש למערכת, עריכת מפרטים טכניים, מחירים ותמונות מוצר.', button: 'הוסף מוצר חדש', nav: '/product' },
 ];
 
-export const STATS: AdminStat[] = [
-  { label: 'מוצרים במלאי', value: '1,248', sub: '+12 השבוע', subClass: 'primary' },
-  { label: 'הזמנות פעילות', value: '42', sub: 'דורשות טיפול', subClass: 'secondary' },
-  { label: 'ציוד בשימוש', value: '85%', sub: 'בחוץ', subClass: 'muted' },
-  { label: 'הכנסות החודש', value: '₪342K', sub: 'יעד: ₪400K', subClass: 'muted' },
-];
+export type QuickActionKey = 'add-product' | 'schedule' | 'inventory-report' | 'settings';
 
-export const QUICK_ACTIONS = [
-  { icon: 'add_circle', label: 'הוסף מוצר חדש' },
-  { icon: 'edit_calendar', label: 'עדכן לוח זמנים' },
-  { icon: 'file_download', label: 'הורד דוח מלאי' },
-  { icon: 'settings', label: 'הגדרות מערכת' },
+export const QUICK_ACTIONS: { key: QuickActionKey; icon: string; label: string }[] = [
+  { key: 'add-product', icon: 'add_circle', label: 'הוסף מוצר חדש' },
+  { key: 'schedule', icon: 'edit_calendar', label: 'עדכן לוח זמנים' },
+  { key: 'inventory-report', icon: 'file_download', label: 'הורד דוח מלאי' },
+  { key: 'settings', icon: 'settings', label: 'הגדרות מערכת' },
 ];
 
 export const ACTION_COLOR_CLASS: Record<number, string> = {

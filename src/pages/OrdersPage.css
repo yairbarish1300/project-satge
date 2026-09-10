@@ -100,6 +100,12 @@
 
 .orders-chip:hover { border-color: #4be277; }
 
+.orders-chip.active {
+  background: #4be277;
+  border-color: #4be277;
+  color: #003915;
+}
+
 .orders-export {
   margin-top: 32px;
   padding-top: 32px;
@@ -136,7 +142,12 @@
   cursor: pointer;
 }
 
-.orders-export-btn:hover { background: #353534; }
+.orders-export-btn:hover:not(:disabled) { background: #353534; }
+
+.orders-export-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 
 @media (max-width: 1200px) {
   .orders-bottom { grid-template-columns: 1fr; }

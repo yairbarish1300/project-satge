@@ -21,8 +21,6 @@ export default function HomePage() {
           links={[
             { label: 'Home', href: '#' },
             { label: 'Shop', href: '#' },
-            { label: 'Rentals', href: '#' },
-            { label: 'Privacy Policy', href: '#' },
           ]}
         />
       </main>

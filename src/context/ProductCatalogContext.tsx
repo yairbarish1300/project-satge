@@ -1,7 +1,6 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { makePlaceholderImage } from '../utils/placeholderImage';
-
-const CATALOG_STORAGE_KEY = 'stage-product-catalog-v1';
+import { API_BASE, useAuth, authHeader } from './AuthContext';
 
 export type CatalogProduct = {
   id: string;
@@ -10,15 +9,14 @@ export type CatalogProduct = {
   description: string;
   category: string;
   image: string;
-  price: number;
+  price: number; // per unit, per day
   unit: string;
-  inStock: boolean;
-  stockAvailable: number;
-  stockTotal: number;
+  inStock: boolean; // the business owns at least one unit (stockTotal > 0)
+  stockTotal: number; // total fleet size — real per-date availability is checked separately
   tags: string[];
 };
 
-type NewCatalogProductInput = {
+export type NewCatalogProductInput = {
   name: string;
   sku: string;
   description: string;
@@ -30,104 +28,111 @@ type NewCatalogProductInput = {
   tags: string[];
 };
 
+export type UpdateCatalogProductInput = Partial<NewCatalogProductInput>;
+
+export type AvailabilityResult = { stockTotal: number; availableUnits: number };
+
 type ProductCatalogContextType = {
   products: CatalogProduct[];
-  addProduct: (input: NewCatalogProductInput) => void;
+  loading: boolean;
+  error: string;
+  addProduct: (input: NewCatalogProductInput) => Promise<void>;
+  updateProduct: (id: string, input: UpdateCatalogProductInput) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
+  checkAvailability: (productId: string, startDate: string, endDate: string) => Promise<AvailabilityResult>;
+  refresh: () => Promise<void>;
 };
 
 const ProductCatalogContext = createContext<ProductCatalogContextType | null>(null);
 
-const INITIAL_PRODUCTS: CatalogProduct[] = [
-  {
-    id: 'shop-1',
-    name: 'רמקול JBL V20 מקצועי',
-    sku: 'AUDIO-01',
-    description: 'מערכת Line Array עוצמתית לאירועים גדולים ופסטיבלים. איכות סאונד קריסטלית.',
-    image: makePlaceholderImage('JBL V20', { accent: '#4be277', secondary: '#adc6ff' }),
-    price: 350,
-    unit: '/ יום',
-    inStock: true,
-    stockAvailable: 18,
-    stockTotal: 24,
-    category: 'Sound',
-    tags: ['רמקול', 'Line Array'],
-  },
-  {
-    id: 'shop-2',
-    name: 'תאורת Beam 230W',
-    sku: 'LIGHT-02',
-    description: 'פנס חכם עם תנועה מהירה וצבעים עזים למופעי במה.',
-    image: makePlaceholderImage('Beam 230W', { accent: '#f59e0b', secondary: '#fb7185' }),
-    price: 180,
-    unit: '/ יום',
-    inStock: false,
-    stockAvailable: 0,
-    stockTotal: 12,
-    category: 'Lighting',
-    tags: ['תאורה', 'Beam'],
-  },
-  {
-    id: 'shop-3',
-    name: 'מיקרופון Shure QLXD אלחוטי',
-    sku: 'MIC-03',
-    description: 'סט אלחוטי דיגיטלי מקצועי לשידור נקי מהפרעות.',
-    image: makePlaceholderImage('Shure QLXD', { accent: '#22c55e', secondary: '#60a5fa' }),
-    price: 220,
-    unit: '/ יום',
-    inStock: true,
-    stockAvailable: 9,
-    stockTotal: 10,
-    category: 'Audio',
-    tags: ['מיקרופון', 'אלחוטי'],
-  },
-];
+async function extractErrorMessage(res: Response, fallback: string): Promise<string> {
+  try {
+    const data = await res.json();
+    return typeof data?.message === 'string' ? data.message : fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 export function ProductCatalogProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<CatalogProduct[]>(() => {
-    if (typeof window === 'undefined') return INITIAL_PRODUCTS;
+  const { token } = useAuth();
+  const [products, setProducts] = useState<CatalogProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    setError('');
     try {
-      const raw = window.localStorage.getItem(CATALOG_STORAGE_KEY);
-      if (!raw) return INITIAL_PRODUCTS;
-      const parsed = JSON.parse(raw) as CatalogProduct[];
-      if (!Array.isArray(parsed) || parsed.length === 0) return INITIAL_PRODUCTS;
-      return parsed;
-    } catch {
-      return INITIAL_PRODUCTS;
+      const res = await fetch(`${API_BASE}/products`);
+      if (!res.ok) throw new Error(await extractErrorMessage(res, 'טעינת המוצרים נכשלה'));
+      const data = await res.json();
+      setProducts(data.products);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'טעינת המוצרים נכשלה');
+    } finally {
+      setLoading(false);
     }
-  });
+  }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(CATALOG_STORAGE_KEY, JSON.stringify(products));
-  }, [products]);
+    refresh();
+  }, [refresh]);
 
-  const value = useMemo<ProductCatalogContextType>(() => {
-    const addProduct = (input: NewCatalogProductInput) => {
-      const total = Math.max(0, Math.floor(input.stockTotal));
+  const addProduct = useCallback(
+    async (input: NewCatalogProductInput) => {
+      const res = await fetch(`${API_BASE}/products`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeader(token) },
+        body: JSON.stringify({
+          ...input,
+          image: input.image || makePlaceholderImage(input.name.trim() || 'New Product'),
+        }),
+      });
+      if (!res.ok) throw new Error(await extractErrorMessage(res, 'הוספת המוצר נכשלה'));
+      const data = await res.json();
+      setProducts((prev) => [data.product, ...prev]);
+    },
+    [token],
+  );
 
-      const product: CatalogProduct = {
-        id: `added-${Date.now()}`,
-        name: input.name.trim(),
-        sku: input.sku.trim(),
-        description: input.description.trim(),
-        category: input.category.trim() || 'General',
-        image: input.image || makePlaceholderImage(input.name.trim() || 'New Product'),
-        price: input.price,
-        unit: input.unit || '/ יום',
-        inStock: total > 0,
-        stockAvailable: total,
-        stockTotal: total,
-        tags: input.tags,
-      };
+  const updateProduct = useCallback(
+    async (id: string, input: UpdateCatalogProductInput) => {
+      const res = await fetch(`${API_BASE}/products/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...authHeader(token) },
+        body: JSON.stringify(input),
+      });
+      if (!res.ok) throw new Error(await extractErrorMessage(res, 'עדכון המוצר נכשל'));
+      const data = await res.json();
+      setProducts((prev) => prev.map((p) => (p.id === id ? data.product : p)));
+    },
+    [token],
+  );
 
-      setProducts((prev) => [product, ...prev]);
-    };
+  const deleteProduct = useCallback(
+    async (id: string) => {
+      const res = await fetch(`${API_BASE}/products/${id}`, {
+        method: 'DELETE',
+        headers: authHeader(token),
+      });
+      if (!res.ok) throw new Error(await extractErrorMessage(res, 'מחיקת המוצר נכשלה'));
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    },
+    [token],
+  );
 
-    return {
-      products,
-      addProduct,
-    };
-  }, [products]);
+  const checkAvailability = useCallback(async (productId: string, startDate: string, endDate: string) => {
+    const params = new URLSearchParams({ startDate, endDate });
+    const res = await fetch(`${API_BASE}/products/${productId}/availability?${params.toString()}`);
+    if (!res.ok) throw new Error(await extractErrorMessage(res, 'בדיקת הזמינות נכשלה'));
+    return (await res.json()) as AvailabilityResult;
+  }, []);
+
+  const value = useMemo<ProductCatalogContextType>(
+    () => ({ products, loading, error, addProduct, updateProduct, deleteProduct, checkAvailability, refresh }),
+    [products, loading, error, addProduct, updateProduct, deleteProduct, checkAvailability, refresh],
+  );
 
   return <ProductCatalogContext.Provider value={value}>{children}</ProductCatalogContext.Provider>;
 }

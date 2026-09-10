@@ -13,20 +13,34 @@ export default function BranchCard({ branch }: BranchCardProps) {
   const [branchEditDraft, setBranchEditDraft] = useState('');
   const [editingLeafId, setEditingLeafId] = useState<string | null>(null);
   const [leafEditDraft, setLeafEditDraft] = useState('');
+  const [busy, setBusy] = useState(false);
 
   const startBranchEdit = () => {
     setIsEditingBranch(true);
     setBranchEditDraft(branch.name);
   };
 
-  const saveBranchEdit = () => {
-    if (!renameBranch(branch.id, branchEditDraft)) return;
-    setIsEditingBranch(false);
+  const saveBranchEdit = async () => {
+    setBusy(true);
+    try {
+      if (await renameBranch(branch.id, branchEditDraft)) {
+        setIsEditingBranch(false);
+      }
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const onAddLeaf = () => {
-    if (!addLeaf(branch.id, leafDraft)) return;
-    setLeafDraft('');
+  const onAddLeaf = async () => {
+    if (!leafDraft.trim()) return;
+    setBusy(true);
+    try {
+      if (await addLeaf(branch.id, leafDraft)) {
+        setLeafDraft('');
+      }
+    } finally {
+      setBusy(false);
+    }
   };
 
   const startLeafEdit = (leafId: string, currentName: string) => {
@@ -34,9 +48,33 @@ export default function BranchCard({ branch }: BranchCardProps) {
     setLeafEditDraft(currentName);
   };
 
-  const saveLeafEdit = (leafId: string) => {
-    if (!renameLeaf(branch.id, leafId, leafEditDraft)) return;
-    setEditingLeafId(null);
+  const saveLeafEdit = async (leafId: string) => {
+    setBusy(true);
+    try {
+      if (await renameLeaf(branch.id, leafId, leafEditDraft)) {
+        setEditingLeafId(null);
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onRemoveBranch = async () => {
+    setBusy(true);
+    try {
+      await removeBranch(branch.id);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const onRemoveLeaf = async (leafId: string) => {
+    setBusy(true);
+    try {
+      await removeLeaf(branch.id, leafId);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -45,15 +83,15 @@ export default function BranchCard({ branch }: BranchCardProps) {
         {isEditingBranch ? (
           <div className="dashboard-edit-wrap">
             <input className="dashboard-edit-input" value={branchEditDraft} onChange={(e) => setBranchEditDraft(e.target.value)} />
-            <button className="dashboard-edit-btn save" onClick={saveBranchEdit}>שמור</button>
-            <button className="dashboard-edit-btn cancel" onClick={() => setIsEditingBranch(false)}>ביטול</button>
+            <button className="dashboard-edit-btn save" onClick={saveBranchEdit} disabled={busy}>שמור</button>
+            <button className="dashboard-edit-btn cancel" onClick={() => setIsEditingBranch(false)} disabled={busy}>ביטול</button>
           </div>
         ) : (
           <>
             <h4>{branch.name}</h4>
             <div className="dashboard-branch-actions">
-              <button className="dashboard-edit-btn" onClick={startBranchEdit}>ערוך</button>
-              <button className="dashboard-remove-btn" onClick={() => removeBranch(branch.id)}>הסר ענף</button>
+              <button className="dashboard-edit-btn" onClick={startBranchEdit} disabled={busy}>ערוך</button>
+              <button className="dashboard-remove-btn" onClick={onRemoveBranch} disabled={busy}>הסר ענף</button>
             </div>
           </>
         )}
@@ -66,15 +104,15 @@ export default function BranchCard({ branch }: BranchCardProps) {
               {editingLeafId === leaf.id ? (
                 <div className="dashboard-edit-wrap compact">
                   <input className="dashboard-edit-input" value={leafEditDraft} onChange={(e) => setLeafEditDraft(e.target.value)} />
-                  <button className="dashboard-edit-btn save small" onClick={() => saveLeafEdit(leaf.id)}>שמור</button>
-                  <button className="dashboard-edit-btn cancel small" onClick={() => setEditingLeafId(null)}>ביטול</button>
+                  <button className="dashboard-edit-btn save small" onClick={() => saveLeafEdit(leaf.id)} disabled={busy}>שמור</button>
+                  <button className="dashboard-edit-btn cancel small" onClick={() => setEditingLeafId(null)} disabled={busy}>ביטול</button>
                 </div>
               ) : (
                 <>
                   <span>{leaf.name}</span>
                   <div className="dashboard-branch-actions">
-                    <button className="dashboard-edit-btn small" onClick={() => startLeafEdit(leaf.id, leaf.name)}>ערוך</button>
-                    <button className="dashboard-remove-btn small" onClick={() => removeLeaf(branch.id, leaf.id)}>הסר</button>
+                    <button className="dashboard-edit-btn small" onClick={() => startLeafEdit(leaf.id, leaf.name)} disabled={busy}>ערוך</button>
+                    <button className="dashboard-remove-btn small" onClick={() => onRemoveLeaf(leaf.id)} disabled={busy}>הסר</button>
                   </div>
                 </>
               )}
@@ -86,8 +124,13 @@ export default function BranchCard({ branch }: BranchCardProps) {
       </div>
 
       <div className="dashboard-add-leaf">
-        <input value={leafDraft} onChange={(e) => setLeafDraft(e.target.value)} placeholder="שם עלה חדש" />
-        <button onClick={onAddLeaf}>הוסף עלה</button>
+        <input
+          value={leafDraft}
+          onChange={(e) => setLeafDraft(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && onAddLeaf()}
+          placeholder="שם עלה חדש"
+        />
+        <button onClick={onAddLeaf} disabled={busy}>הוסף עלה</button>
       </div>
     </article>
   );

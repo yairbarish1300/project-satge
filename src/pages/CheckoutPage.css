@@ -96,18 +96,10 @@
   color: #4be277;
 }
 
-.checkout-section-title.secondary {
-  color: #adc6ff;
-}
-
 .checkout-fields {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-}
-
-.checkout-fields.single-col {
-  grid-template-columns: 1fr;
 }
 
 .checkout-field {
@@ -130,14 +122,7 @@
   font-family: 'JetBrains Mono', monospace;
 }
 
-.checkout-input-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.checkout-input,
-.checkout-input-icon {
+.checkout-input {
   width: 100%;
   background: #1c1b1b;
   border: 1px solid #353534;
@@ -150,29 +135,84 @@
   font-size: 14px;
 }
 
-.checkout-input-icon {
-  padding-left: 40px;
-}
-
-.checkout-input:focus,
-.checkout-input-icon:focus {
+.checkout-input:focus {
   border-color: #4be277;
 }
 
-.checkout-section.focused .checkout-input:focus,
-.checkout-section.focused .checkout-input-icon:focus {
+.checkout-section.focused .checkout-input:focus {
   border-color: #adc6ff;
 }
 
-.checkout-input-wrap .msym {
-  position: absolute;
-  right: 12px;
-  font-size: 20px;
+.checkout-status-message {
+  text-align: center;
   color: #bccbb9;
+  padding: 64px 0;
+  font-size: 16px;
+}
+
+.checkout-availability-note {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: #adc6ff;
+}
+
+.checkout-availability-note.warning {
+  color: #ff8b7c;
+}
+
+.checkout-error {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: rgba(255, 139, 124, 0.1);
+  border: 1px solid rgba(255, 139, 124, 0.3);
+  color: #ff8b7c;
+  font-size: 14px;
+  text-align: center;
+}
+
+.checkout-success {
+  background: #0e0e0e;
+  border: 1px solid #353534;
+  border-radius: 16px;
+  padding: 48px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.checkout-success .msym {
+  font-size: 56px;
+  color: #4be277;
+}
+
+.checkout-success h2 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.checkout-success p {
+  margin: 0;
+  color: #bccbb9;
+}
+
+.checkout-success .checkout-submit {
+  margin-top: 16px;
+  width: auto;
+  padding: 12px 32px;
+  font-size: 16px;
 }
 
 .checkout-submit-wrap {
   padding-top: 16px;
+}
+
+.checkout-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .checkout-submit {

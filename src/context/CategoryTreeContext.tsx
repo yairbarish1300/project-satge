@@ -1,6 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-
-const CATEGORY_STORAGE_KEY = 'stage-category-tree-v1';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { API_BASE, authHeader, useAuth } from './AuthContext';
 
 export type CategoryLeaf = {
   id: string;
@@ -15,150 +14,171 @@ export type CategoryBranch = {
 
 type CategoryTreeContextType = {
   branches: CategoryBranch[];
-  addBranch: (name: string) => boolean;
-  removeBranch: (branchId: string) => void;
-  renameBranch: (branchId: string, nextName: string) => boolean;
-  addLeaf: (branchId: string, leafName: string) => boolean;
-  removeLeaf: (branchId: string, leafId: string) => void;
-  renameLeaf: (branchId: string, leafId: string, nextName: string) => boolean;
+  loading: boolean;
+  error: string;
+  addBranch: (name: string) => Promise<boolean>;
+  removeBranch: (branchId: string) => Promise<void>;
+  renameBranch: (branchId: string, nextName: string) => Promise<boolean>;
+  addLeaf: (branchId: string, leafName: string) => Promise<boolean>;
+  removeLeaf: (branchId: string, leafId: string) => Promise<void>;
+  renameLeaf: (branchId: string, leafId: string, nextName: string) => Promise<boolean>;
 };
 
 const CategoryTreeContext = createContext<CategoryTreeContextType | null>(null);
 
-const INITIAL_BRANCHES: CategoryBranch[] = [
-  {
-    id: 'branch-audio',
-    name: 'Audio',
-    leaves: [
-      { id: 'leaf-speaker', name: 'רמקול' },
-      { id: 'leaf-mic', name: 'מיקרופון' },
-      { id: 'leaf-amp', name: 'מגבר' },
-    ],
-  },
-  {
-    id: 'branch-lighting',
-    name: 'Lighting',
-    leaves: [{ id: 'leaf-lighting', name: 'תאורה' }],
-  },
-  {
-    id: 'branch-accessories',
-    name: 'Accessories',
-    leaves: [{ id: 'leaf-headphones', name: 'אוזניות' }],
-  },
-];
-
-function normalizedName(value: string) {
-  return value.trim().toLowerCase();
+async function extractErrorMessage(res: Response, fallback: string): Promise<string> {
+  try {
+    const data = await res.json();
+    return typeof data?.message === 'string' ? data.message : fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 export function CategoryTreeProvider({ children }: { children: ReactNode }) {
-  const [branches, setBranches] = useState<CategoryBranch[]>(() => {
-    if (typeof window === 'undefined') return INITIAL_BRANCHES;
+  const { token } = useAuth();
+  const [branches, setBranches] = useState<CategoryBranch[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    setError('');
     try {
-      const raw = window.localStorage.getItem(CATEGORY_STORAGE_KEY);
-      if (!raw) return INITIAL_BRANCHES;
-      const parsed = JSON.parse(raw) as CategoryBranch[];
-      if (!Array.isArray(parsed)) return INITIAL_BRANCHES;
-      return parsed;
-    } catch {
-      return INITIAL_BRANCHES;
+      const res = await fetch(`${API_BASE}/categories`);
+      if (!res.ok) throw new Error(await extractErrorMessage(res, 'טעינת הקטגוריות נכשלה'));
+      const data = await res.json();
+      setBranches(data.categories);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'טעינת הקטגוריות נכשלה');
+    } finally {
+      setLoading(false);
     }
-  });
+  }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(CATEGORY_STORAGE_KEY, JSON.stringify(branches));
-  }, [branches]);
+    refresh();
+  }, [refresh]);
 
-  const value = useMemo<CategoryTreeContextType>(() => {
-    const addBranch = (name: string) => {
-      const trimmed = name.trim();
-      if (!trimmed) return false;
-      const exists = branches.some((b) => normalizedName(b.name) === normalizedName(trimmed));
-      if (exists) return false;
+  const jsonHeaders = useMemo(() => ({ 'Content-Type': 'application/json', ...authHeader(token) }), [token]);
 
-      setBranches((prev) => [...prev, { id: `branch-${Date.now()}`, name: trimmed, leaves: [] }]);
+  const addBranch = useCallback(
+    async (name: string) => {
+      if (!name.trim()) return false;
+      const res = await fetch(`${API_BASE}/categories`, {
+        method: 'POST',
+        headers: jsonHeaders,
+        body: JSON.stringify({ name }),
+      });
+      if (!res.ok) {
+        setError(await extractErrorMessage(res, 'הוספת הענף נכשלה'));
+        return false;
+      }
+      const data = await res.json();
+      setBranches((prev) => [...prev, data.category]);
+      setError('');
       return true;
-    };
+    },
+    [jsonHeaders],
+  );
 
-    const removeBranch = (branchId: string) => {
+  const removeBranch = useCallback(
+    async (branchId: string) => {
+      const res = await fetch(`${API_BASE}/categories/${branchId}`, {
+        method: 'DELETE',
+        headers: authHeader(token),
+      });
+      if (!res.ok) {
+        setError(await extractErrorMessage(res, 'הסרת הענף נכשלה'));
+        return;
+      }
       setBranches((prev) => prev.filter((b) => b.id !== branchId));
-    };
+      setError('');
+    },
+    [token],
+  );
 
-    const renameBranch = (branchId: string, nextName: string) => {
-      const trimmed = nextName.trim();
-      if (!trimmed) return false;
-
-      const exists = branches.some((branch) => branch.id !== branchId && normalizedName(branch.name) === normalizedName(trimmed));
-      if (exists) return false;
-
-      setBranches((prev) => prev.map((branch) => (branch.id === branchId ? { ...branch, name: trimmed } : branch)));
+  const renameBranch = useCallback(
+    async (branchId: string, nextName: string) => {
+      if (!nextName.trim()) return false;
+      const res = await fetch(`${API_BASE}/categories/${branchId}`, {
+        method: 'PUT',
+        headers: jsonHeaders,
+        body: JSON.stringify({ name: nextName }),
+      });
+      if (!res.ok) {
+        setError(await extractErrorMessage(res, 'שינוי שם הענף נכשל'));
+        return false;
+      }
+      const data = await res.json();
+      setBranches((prev) => prev.map((b) => (b.id === branchId ? data.category : b)));
+      setError('');
       return true;
-    };
+    },
+    [jsonHeaders],
+  );
 
-    const addLeaf = (branchId: string, leafName: string) => {
-      const trimmed = leafName.trim();
-      if (!trimmed) return false;
-
-      const duplicateInBranch = branches
-        .find((b) => b.id === branchId)
-        ?.leaves.some((leaf) => normalizedName(leaf.name) === normalizedName(trimmed));
-
-      if (duplicateInBranch) return false;
-
-      setBranches((prev) =>
-        prev.map((b) =>
-          b.id === branchId
-            ? { ...b, leaves: [...b.leaves, { id: `leaf-${Date.now()}-${Math.floor(Math.random() * 1000)}`, name: trimmed }] }
-            : b,
-        ),
-      );
-
+  const addLeaf = useCallback(
+    async (branchId: string, leafName: string) => {
+      if (!leafName.trim()) return false;
+      const res = await fetch(`${API_BASE}/categories/${branchId}/leaves`, {
+        method: 'POST',
+        headers: jsonHeaders,
+        body: JSON.stringify({ name: leafName }),
+      });
+      if (!res.ok) {
+        setError(await extractErrorMessage(res, 'הוספת העלה נכשלה'));
+        return false;
+      }
+      const data = await res.json();
+      setBranches((prev) => prev.map((b) => (b.id === branchId ? data.category : b)));
+      setError('');
       return true;
-    };
+    },
+    [jsonHeaders],
+  );
 
-    const removeLeaf = (branchId: string, leafId: string) => {
-      setBranches((prev) =>
-        prev.map((b) =>
-          b.id === branchId
-            ? { ...b, leaves: b.leaves.filter((leaf) => leaf.id !== leafId) }
-            : b,
-        ),
-      );
-    };
+  const removeLeaf = useCallback(
+    async (branchId: string, leafId: string) => {
+      const res = await fetch(`${API_BASE}/categories/${branchId}/leaves/${leafId}`, {
+        method: 'DELETE',
+        headers: authHeader(token),
+      });
+      if (!res.ok) {
+        setError(await extractErrorMessage(res, 'הסרת העלה נכשלה'));
+        return;
+      }
+      const data = await res.json();
+      setBranches((prev) => prev.map((b) => (b.id === branchId ? data.category : b)));
+      setError('');
+    },
+    [token],
+  );
 
-    const renameLeaf = (branchId: string, leafId: string, nextName: string) => {
-      const trimmed = nextName.trim();
-      if (!trimmed) return false;
-
-      const targetBranch = branches.find((branch) => branch.id === branchId);
-      const exists = targetBranch?.leaves.some((leaf) => leaf.id !== leafId && normalizedName(leaf.name) === normalizedName(trimmed));
-      if (exists) return false;
-
-      setBranches((prev) =>
-        prev.map((branch) =>
-          branch.id === branchId
-            ? {
-                ...branch,
-                leaves: branch.leaves.map((leaf) => (leaf.id === leafId ? { ...leaf, name: trimmed } : leaf)),
-              }
-            : branch,
-        ),
-      );
-
+  const renameLeaf = useCallback(
+    async (branchId: string, leafId: string, nextName: string) => {
+      if (!nextName.trim()) return false;
+      const res = await fetch(`${API_BASE}/categories/${branchId}/leaves/${leafId}`, {
+        method: 'PUT',
+        headers: jsonHeaders,
+        body: JSON.stringify({ name: nextName }),
+      });
+      if (!res.ok) {
+        setError(await extractErrorMessage(res, 'שינוי שם העלה נכשל'));
+        return false;
+      }
+      const data = await res.json();
+      setBranches((prev) => prev.map((b) => (b.id === branchId ? data.category : b)));
+      setError('');
       return true;
-    };
+    },
+    [jsonHeaders],
+  );
 
-    return {
-      branches,
-      addBranch,
-      removeBranch,
-      renameBranch,
-      addLeaf,
-      removeLeaf,
-      renameLeaf,
-    };
-  }, [branches]);
+  const value = useMemo<CategoryTreeContextType>(
+    () => ({ branches, loading, error, addBranch, removeBranch, renameBranch, addLeaf, removeLeaf, renameLeaf }),
+    [branches, loading, error, addBranch, removeBranch, renameBranch, addLeaf, removeLeaf, renameLeaf],
+  );
 
   return <CategoryTreeContext.Provider value={value}>{children}</CategoryTreeContext.Provider>;
 }

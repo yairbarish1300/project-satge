@@ -410,6 +410,7 @@
 .orders-status.approved { background: rgba(75, 226, 119, 0.1); color: #4be277; }
 .orders-status.pending { background: rgba(173, 198, 255, 0.1); color: #adc6ff; }
 .orders-status.completed { background: rgba(173, 198, 255, 0.1); color: #bccbb9; }
+.orders-status.cancelled { background: rgba(255, 139, 124, 0.1); color: #ff8b7c; }
 
 .orders-status-dot {
   width: 6px;
@@ -430,6 +431,65 @@
 }
 
 .orders-more:hover { color: #4be277; }
+
+/* Shared row-level edit/delete action buttons (Inventory, Orders, ...) */
+.inv-actions {
+  display: inline-flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.inv-edit-btn,
+.inv-remove-btn {
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.inv-edit-btn {
+  background: rgba(173, 198, 255, 0.1);
+  border: 1px solid rgba(173, 198, 255, 0.35);
+  color: #adc6ff;
+}
+
+.inv-remove-btn {
+  background: rgba(255, 139, 124, 0.1);
+  border: 1px solid rgba(255, 139, 124, 0.35);
+  color: #ff8b7c;
+}
+
+.inv-edit-btn:hover:not(:disabled),
+.inv-remove-btn:hover:not(:disabled) {
+  filter: brightness(1.15);
+}
+
+.inv-remove-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.admin-error {
+  margin: 0 0 16px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 139, 124, 0.1);
+  border: 1px solid rgba(255, 139, 124, 0.3);
+  color: #ff8b7c;
+  font-size: 13px;
+  text-align: right;
+}
+
+.admin-loading-row,
+.admin-empty-row {
+  padding: 32px 0 !important;
+  color: #bccbb9;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  text-align: center;
+}
 
 .orders-table-foot {
   background: #2a2a2a;

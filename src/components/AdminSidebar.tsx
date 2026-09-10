@@ -64,7 +64,7 @@ export default function AdminSidebar({ active }: AdminSidebarProps) {
             <p className="admin-user-role">{isManager ? 'Master Access' : 'Employee Access'}</p>
           </div>
         </div>
-        <div className="admin-user-action"><span className="msym">settings</span><span>Settings</span></div>
+        <div className="admin-user-action" onClick={() => navigate('/settings')}><span className="msym">settings</span><span>Settings</span></div>
         <div className="admin-user-action" onClick={handleLogout}><span className="msym">logout</span><span>Logout</span></div>
       </div>
 

@@ -154,6 +154,17 @@
   border: 1px solid #353534;
 }
 
+.order-reserved-summary p {
+  margin: 0;
+  background: #1c1b1b;
+  border: 1px solid #353534;
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #bccbb9;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
 .add-product-error {
   margin: 16px 0 0;
   color: #ffb4ab;
@@ -186,6 +197,11 @@
 .add-product-submit {
   background: #4be277;
   color: #003915;
+}
+
+.add-product-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 @media (max-width: 760px) {

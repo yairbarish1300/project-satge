@@ -30,12 +30,14 @@
 .rp-btn-primary,
 .rp-btn-secondary,
 .rp-btn-ghost {
+  display: inline-block;
   border-radius: 10px;
   border: 1px solid transparent;
   padding: 12px 20px;
   cursor: pointer;
   font-weight: 700;
   font-family: 'Hanken Grotesk', sans-serif;
+  text-decoration: none;
 }
 
 .rp-btn-primary {

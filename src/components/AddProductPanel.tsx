@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useCategoryTree } from '../context/CategoryTreeContext';
-import { useProductCatalog } from '../context/ProductCatalogContext';
+import { useProductCatalog, type CatalogProduct } from '../context/ProductCatalogContext';
 import ProductDetailsFields from './addProduct/ProductDetailsFields';
 import TagInput from './addProduct/TagInput';
 import ImageUploadField from './addProduct/ImageUploadField';
@@ -9,11 +9,14 @@ import './AddProductPanel.css';
 type AddProductPanelProps = {
   open: boolean;
   onClose: () => void;
+  // When set, the panel edits this product instead of creating a new one.
+  editingProduct?: CatalogProduct | null;
 };
 
-export default function AddProductPanel({ open, onClose }: AddProductPanelProps) {
-  const { addProduct } = useProductCatalog();
+export default function AddProductPanel({ open, onClose, editingProduct = null }: AddProductPanelProps) {
+  const { addProduct, updateProduct } = useProductCatalog();
   const { branches } = useCategoryTree();
+  const isEditing = Boolean(editingProduct);
 
   const branchCategories = useMemo(() => branches.map((branch) => branch.name), [branches]);
 
@@ -26,36 +29,51 @@ export default function AddProductPanel({ open, onClose }: AddProductPanelProps)
   const [tags, setTags] = useState<string[]>([]);
   const [imageData, setImageData] = useState('');
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    if (!open) return;
+
+    if (editingProduct) {
+      setName(editingProduct.name);
+      setSku(editingProduct.sku);
+      setDescription(editingProduct.description);
+      setPrice(String(editingProduct.price));
+      setStockTotal(String(editingProduct.stockTotal));
+      setCategory(editingProduct.category);
+      setTags(editingProduct.tags);
+      setImageData(editingProduct.image);
+    } else {
+      setName('');
+      setSku('');
+      setDescription('');
+      setPrice('');
+      setStockTotal('');
+      setCategory(branchCategories[0] || '');
+      setTags([]);
+      setImageData('');
+    }
+    setError('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, editingProduct]);
+
+  useEffect(() => {
+    if (isEditing) return;
     if (branchCategories.length === 0) {
       setCategory('');
       return;
     }
-
     if (!branchCategories.includes(category)) {
       setCategory(branchCategories[0]);
     }
-  }, [branchCategories, category]);
-
-  const resetForm = () => {
-    setName('');
-    setSku('');
-    setDescription('');
-    setPrice('');
-    setStockTotal('');
-    setCategory(branchCategories[0] || '');
-    setTags([]);
-    setImageData('');
-    setError('');
-  };
+  }, [branchCategories, category, isEditing]);
 
   const closePanel = () => {
-    resetForm();
+    setError('');
     onClose();
   };
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     const parsedPrice = Number(price);
     const parsedStock = Number(stockTotal);
 
@@ -76,18 +94,38 @@ export default function AddProductPanel({ open, onClose }: AddProductPanelProps)
       return;
     }
 
-    addProduct({
-      name,
-      sku,
-      description,
-      category,
-      image: imageData,
-      price: parsedPrice,
-      stockTotal: parsedStock,
-      tags,
-    });
-
-    closePanel();
+    setSubmitting(true);
+    setError('');
+    try {
+      if (isEditing && editingProduct) {
+        await updateProduct(editingProduct.id, {
+          name,
+          sku,
+          description,
+          category,
+          image: imageData,
+          price: parsedPrice,
+          stockTotal: parsedStock,
+          tags,
+        });
+      } else {
+        await addProduct({
+          name,
+          sku,
+          description,
+          category,
+          image: imageData,
+          price: parsedPrice,
+          stockTotal: parsedStock,
+          tags,
+        });
+      }
+      closePanel();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'השמירה נכשלה, נסה שוב');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (!open) return null;
@@ -97,8 +135,8 @@ export default function AddProductPanel({ open, onClose }: AddProductPanelProps)
       <section className="add-product-panel" onClick={(e) => e.stopPropagation()}>
         <div className="add-product-head">
           <div>
-            <h3>הוסף מוצר חדש</h3>
-            <p>המוצר יתווסף אוטומטית ל־Store ול־Inventory</p>
+            <h3>{isEditing ? 'עריכת מוצר' : 'הוסף מוצר חדש'}</h3>
+            <p>{isEditing ? 'השינויים יתעדכנו מיידית ב-Store וב-Inventory' : 'המוצר יתווסף אוטומטית ל־Store ול־Inventory'}</p>
           </div>
           <button className="add-product-close" onClick={closePanel} aria-label="Close panel">
             <span className="msym">close</span>
@@ -124,7 +162,9 @@ export default function AddProductPanel({ open, onClose }: AddProductPanelProps)
 
         <div className="add-product-actions">
           <button className="add-product-cancel" onClick={closePanel}>ביטול</button>
-          <button className="add-product-submit" onClick={onSubmit}>הוסף מוצר</button>
+          <button className="add-product-submit" onClick={onSubmit} disabled={submitting}>
+            {submitting ? 'שומר...' : isEditing ? 'שמור שינויים' : 'הוסף מוצר'}
+          </button>
         </div>
       </section>
     </div>

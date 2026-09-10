@@ -45,7 +45,19 @@
       "PowerShell(Start-Process \"http://localhost:4178/register\")",
       "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
       "Bash(curl -s http://localhost:5050/api/health)",
-      "Bash(curl -s -o /dev/null -w \"frontend: %{http_code}\\\\n\" http://localhost:4178)"
+      "Bash(curl -s -o /dev/null -w \"frontend: %{http_code}\\\\n\" http://localhost:4178)",
+      "Bash(node -e ' *)",
+      "Bash(node --input-type=module -e ' *)",
+      "Read(//dev/**)",
+      "Bash(tasklist //FI \"PID eq $\\(cat /dev/null\\)\")",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //F //PID 31800)",
+      "Bash(curl -s http://localhost:5050/api/products)",
+      "Bash(curl -s -o /dev/null -w \"home: %{http_code}\\\\n\" http://localhost:4178)",
+      "Bash(curl -s -o /dev/null -w \"inventory: %{http_code}\\\\n\" http://localhost:4178/inventory)",
+      "Bash(curl -s -o /dev/null -w \"orders: %{http_code}\\\\n\" http://localhost:4178/orders)",
+      "Bash(curl -s -o /dev/null -w \"shop: %{http_code}\\\\n\" http://localhost:4178/shop)",
+      "Bash(curl -s -o /dev/null -w \"checkout: %{http_code}\\\\n\" http://localhost:4178/checkout)"
     ],
     "additionalDirectories": [
       "C:\\Users\\yairb\\OneDrive\\שולחן העבודה\\stage web project\\server"

@@ -1,13 +1,16 @@
 import TableFooter from '../admin/TableFooter';
-import { statusClass, type Order } from './ordersData';
+import { statusClass, statusLabel, type Order } from './ordersData';
 
 interface OrdersTableProps {
   orders: Order[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  onEdit: (order: Order) => void;
+  onDelete: (order: Order) => void;
+  deletingId?: string | null;
 }
 
-export default function OrdersTable({ orders, selectedId, onSelect }: OrdersTableProps) {
+export default function OrdersTable({ orders, selectedId, onSelect, onEdit, onDelete, deletingId }: OrdersTableProps) {
   return (
     <div className="orders-table-card">
       <div className="orders-table-wrap">
@@ -19,7 +22,7 @@ export default function OrdersTable({ orders, selectedId, onSelect }: OrdersTabl
               <th>Dates</th>
               <th className="ta-right">Total</th>
               <th className="ta-center">Status</th>
-              <th></th>
+              <th className="ta-center">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -35,24 +38,39 @@ export default function OrdersTable({ orders, selectedId, onSelect }: OrdersTabl
                   </div>
                 </td>
                 <td>
-                  <p className="orders-company">{order.company}</p>
-                  <p className="orders-product">{order.product}</p>
+                  <p className="orders-company">{order.company || '—'}</p>
+                  <p className="orders-product">
+                    {order.product}
+                    {order.unitNumbers?.length ? ` (יח' #${order.unitNumbers.join(', #')})` : ''}
+                  </p>
                 </td>
                 <td><span className="orders-date-pill">{order.dates}</span></td>
                 <td className="ta-right"><span className="orders-price">{order.price}</span></td>
                 <td className="ta-center">
                   <span className={`orders-status ${statusClass(order.status)}`}>
                     {order.status !== 'completed' ? <span className="orders-status-dot" /> : null}
-                    {order.status}
+                    {statusLabel(order.status)}
                   </span>
                 </td>
-                <td className="ta-right"><button className="orders-more"><span className="msym">more_vert</span></button></td>
+                <td className="ta-center" onClick={(e) => e.stopPropagation()}>
+                  <div className="inv-actions">
+                    <button type="button" className="inv-edit-btn" onClick={() => onEdit(order)}>ערוך</button>
+                    <button
+                      type="button"
+                      className="inv-remove-btn"
+                      disabled={deletingId === order.mongoId}
+                      onClick={() => onDelete(order)}
+                    >
+                      {deletingId === order.mongoId ? 'מוחק...' : 'מחק'}
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <TableFooter summary="Showing 1 to 5 of 847 entries" pageCount={3} activePage={1} />
+      <TableFooter summary={`Showing 1 to ${orders.length} of ${orders.length} entries`} pageCount={1} activePage={1} />
     </div>
   );
 }

@@ -56,7 +56,7 @@ export default function ShopPage() {
             <ProductDetailPanel
               product={selectedProduct}
               onClose={() => setSelectedProduct(null)}
-              onOrder={() => navigate('/checkout')}
+              onOrder={() => navigate(`/checkout?productId=${selectedProduct.id}`)}
             />
           ) : null}
         </section>

@@ -1,35 +1,46 @@
-import { PRODUCT } from './checkoutData';
+import type { CatalogProduct } from '../../context/ProductCatalogContext';
 
-export default function OrderSummaryCard() {
+interface OrderSummaryCardProps {
+  product: CatalogProduct;
+  quantity: number;
+  days: number;
+  totalPrice: number;
+}
+
+export default function OrderSummaryCard({ product, quantity, days, totalPrice }: OrderSummaryCardProps) {
+  const hasRange = days > 0;
+
   return (
     <div className="checkout-card">
       <div className="checkout-card-hero">
-        <img src={PRODUCT.image} alt={PRODUCT.title} />
+        <img src={product.image} alt={product.name} />
         <div className="checkout-card-overlay" />
         <div className="checkout-card-caption">
-          <span className="checkout-badge">{PRODUCT.subtitle}</span>
-          <h3>{PRODUCT.title}</h3>
+          <span className="checkout-badge">{product.category}</span>
+          <h3>{product.name}</h3>
         </div>
       </div>
 
       <div className="checkout-card-body">
         <div className="checkout-row label">
-          <span>מחיר ליום</span>
-          <span className="value">₪{PRODUCT.pricePerDay.toLocaleString()}</span>
+          <span>מחיר ליחידה ליום</span>
+          <span className="value">₪{product.price.toLocaleString('he-IL')}</span>
         </div>
 
         <div className="checkout-breakdown">
-          {PRODUCT.breakdown.map((item, idx) => (
-            <div key={idx} className="item">
-              <span className="name">{item.label}</span>
-              <span>₪{item.value.toLocaleString()}</span>
-            </div>
-          ))}
+          <div className="item">
+            <span className="name">כמות</span>
+            <span>{quantity} יח'</span>
+          </div>
+          <div className="item">
+            <span className="name">משך השכרה</span>
+            <span>{hasRange ? `${days} ${days === 1 ? 'יום' : 'ימים'}` : '—'}</span>
+          </div>
         </div>
 
         <div className="checkout-total">
           <span className="name">סה"כ לתשלום</span>
-          <span className="value">₪{PRODUCT.total.toLocaleString()}</span>
+          <span className="value">₪{totalPrice.toLocaleString('he-IL')}</span>
         </div>
       </div>
     </div>

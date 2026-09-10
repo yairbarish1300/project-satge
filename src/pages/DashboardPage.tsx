@@ -1,17 +1,87 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminSidebar from '../components/AdminSidebar';
 import AddProductPanel from '../components/AddProductPanel';
 import AdminPageHeader from '../components/admin/AdminPageHeader';
-import StatsGrid from '../components/admin/StatsGrid';
+import StatsGrid, { type AdminStat } from '../components/admin/StatsGrid';
 import DashboardActionsGrid from '../components/dashboard/DashboardActionsGrid';
 import QuickActionsGrid from '../components/dashboard/QuickActionsGrid';
 import CategoryManager from '../components/dashboard/CategoryManager';
 import { AdminFooter } from '../components/PageFooters';
-import { STATS } from '../components/dashboard/dashboardData';
+import { API_BASE, authHeader, useAuth } from '../context/AuthContext';
 import './DashboardPage.css';
 
+interface DashboardStats {
+  totalUnits: number;
+  productCount: number;
+  activeOrdersCount: number;
+  unitsInUse: number;
+  inUsePercent: number;
+  revenueThisMonth: number;
+  monthOrdersCount: number;
+}
+
+function buildStatTiles(stats: DashboardStats): AdminStat[] {
+  return [
+    {
+      label: 'מוצרים במלאי',
+      value: stats.productCount.toLocaleString('he-IL'),
+      sub: `${stats.totalUnits.toLocaleString('he-IL')} יחידות בסה"כ`,
+      subClass: 'primary',
+    },
+    {
+      label: 'הזמנות פעילות',
+      value: stats.activeOrdersCount.toLocaleString('he-IL'),
+      sub: 'ממתינות לטיפול',
+      subClass: 'secondary',
+    },
+    {
+      label: 'ציוד בשימוש היום',
+      value: `${stats.inUsePercent}%`,
+      sub: `${stats.unitsInUse.toLocaleString('he-IL')} מתוך ${stats.totalUnits.toLocaleString('he-IL')} יחידות`,
+      subClass: 'muted',
+    },
+    {
+      label: 'הכנסות החודש',
+      value: `₪${stats.revenueThisMonth.toLocaleString('he-IL')}`,
+      sub: `מ-${stats.monthOrdersCount.toLocaleString('he-IL')} הזמנות`,
+      subClass: 'muted',
+    },
+  ];
+}
+
 export default function DashboardPage() {
+  const { token } = useAuth();
   const [isAddPanelOpen, setIsAddPanelOpen] = useState(false);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadStats = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const res = await fetch(`${API_BASE}/dashboard/stats`, { headers: authHeader(token) });
+        if (!res.ok) {
+          const data = await res.json().catch(() => null);
+          throw new Error(data?.message ?? 'טעינת נתוני לוח הבקרה נכשלה');
+        }
+        const data = await res.json();
+        if (!cancelled) setStats(data);
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'טעינת נתוני לוח הבקרה נכשלה');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    loadStats();
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   return (
     <div className="admin-shell">
@@ -24,7 +94,13 @@ export default function DashboardPage() {
             description="ברוכים הבאים למערכת הניהול של STAGE. כאן תוכלו לנהל את כל היבטי ההפקה, המלאי וההזמנות בזמן אמת."
           />
 
-          <StatsGrid stats={STATS} />
+          {error && <p className="admin-error">{error}</p>}
+
+          {loading ? (
+            <p className="admin-loading-row">טוען נתונים...</p>
+          ) : stats ? (
+            <StatsGrid stats={buildStatTiles(stats)} />
+          ) : null}
 
           <DashboardActionsGrid onAddProduct={() => setIsAddPanelOpen(true)} />
 

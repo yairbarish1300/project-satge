@@ -1,33 +1,37 @@
 import type { AdminStat } from '../admin/StatsGrid';
+import type { CatalogProduct } from '../../context/ProductCatalogContext';
 
-export type InventoryStatus = 'available' | 'in-use' | 'low-stock';
-
-export interface InventoryItem {
-  id: string;
-  name: string;
-  sku: string;
-  category: string;
-  stock: string;
-  dayRate: string;
-  status: InventoryStatus;
-}
-
-export const BASE_ITEMS: InventoryItem[] = [
-  { id: '1', name: 'L-Acoustics K2 Line Array', sku: 'AUD-K2-001', category: 'Sound', stock: '128/150', dayRate: '$450.00', status: 'available' },
-  { id: '2', name: 'Martin MAC Viper Performance', sku: 'LGT-VIP-042', category: 'Lighting', stock: '32/80', dayRate: '$175.00', status: 'in-use' },
-  { id: '3', name: 'ROE Visual Black Pearl 2.8', sku: 'VID-ROE-992', category: 'Screens', stock: '12/350', dayRate: '$120.00', status: 'low-stock' },
-  { id: '4', name: 'Yamaha Rivage PM7', sku: 'AUD-YAM-007', category: 'Sound', stock: '4/4', dayRate: '$1,200.00', status: 'available' },
-];
-
-export const STATS: AdminStat[] = [
-  { label: 'Items in Stock', value: '1,248', sub: '+12 this week', subClass: 'primary' },
-  { label: 'Active Rentals', value: '85%', sub: 'out on site', subClass: 'secondary' },
-  { label: 'Low Stock', value: '14', sub: 'needs attention', subClass: 'tertiary' },
-  { label: 'Inventory Value', value: '$342K', sub: 'estimated', subClass: 'muted' },
-];
+export type InventoryStatus = 'available' | 'out-of-stock' | 'low-stock';
 
 export function statusClass(status: InventoryStatus) {
   if (status === 'available') return 'approved';
-  if (status === 'in-use') return 'pending';
+  if (status === 'out-of-stock') return 'pending';
   return 'completed';
+}
+
+// This reflects total fleet size, not real-time availability — whether a
+// unit is actually free depends on the requested date range (checked at
+// booking time), so this is only a coarse "how big is this fleet" signal.
+export function inventoryStatusFor(stockTotal: number): InventoryStatus {
+  if (stockTotal === 0) return 'out-of-stock';
+  if (stockTotal <= 3) return 'low-stock';
+  return 'available';
+}
+
+// Computed live from the real product catalog — no hardcoded placeholder numbers.
+// (There used to be an "estimated inventory value" tile here computed as
+// price-per-day × quantity, but that conflates daily rental price with asset
+// value and doesn't mean anything real — removed rather than show a wrong number.)
+export function buildInventoryStats(products: CatalogProduct[]): AdminStat[] {
+  const totalUnits = products.reduce((sum, p) => sum + p.stockTotal, 0);
+  const lowStockCount = products.filter((p) => p.stockTotal > 0 && p.stockTotal <= 3).length;
+  const outOfStockCount = products.filter((p) => p.stockTotal === 0).length;
+  const categoriesInUse = new Set(products.map((p) => p.category).filter(Boolean)).size;
+
+  return [
+    { label: 'מוצרים במלאי', value: products.length.toLocaleString('he-IL'), sub: `${totalUnits.toLocaleString('he-IL')} יחידות בסה"כ`, subClass: 'primary' },
+    { label: 'מלאי נמוך', value: lowStockCount.toLocaleString('he-IL'), sub: lowStockCount > 0 ? 'דורש תשומת לב' : 'הכל תקין', subClass: 'tertiary' },
+    { label: 'חסר מלאי', value: outOfStockCount.toLocaleString('he-IL'), sub: outOfStockCount > 0 ? 'לא זמין להזמנה' : 'אין מוצרים חסרים', subClass: 'secondary' },
+    { label: 'קטגוריות בשימוש', value: categoriesInUse.toLocaleString('he-IL'), sub: 'קטגוריות שונות במלאי', subClass: 'muted' },
+  ];
 }

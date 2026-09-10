@@ -67,7 +67,7 @@ export default function EmployeesPage() {
         <div className="admin-content">
           <AdminPageHeader title="ניהול עובדים" description="צפייה ברשימת כל העובדים והמנהלים במערכת, והסרת עובדים במידת הצורך." />
 
-          {error && <p className="rp-error emp-error">{error}</p>}
+          {error && <p className="admin-error">{error}</p>}
 
           <div className="orders-table-card">
             <div className="orders-table-wrap">
@@ -84,11 +84,11 @@ export default function EmployeesPage() {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={5} className="ta-center emp-empty-row">טוען עובדים...</td>
+                      <td colSpan={5} className="ta-center admin-empty-row">טוען עובדים...</td>
                     </tr>
                   ) : employees.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="ta-center emp-empty-row">אין עדיין עובדים רשומים</td>
+                      <td colSpan={5} className="ta-center admin-empty-row">אין עדיין עובדים רשומים</td>
                     </tr>
                   ) : (
                     employees.map((employee) => {
@@ -115,7 +115,7 @@ export default function EmployeesPage() {
                           <td className="ta-center">
                             <button
                               type="button"
-                              className="emp-remove-btn"
+                              className="inv-remove-btn"
                               disabled={isSelf || removingId === employee.id}
                               onClick={() => handleRemove(employee)}
                             >
