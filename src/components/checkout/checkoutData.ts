@@ -12,10 +12,9 @@ export interface FormSection {
   fields: FormField[];
 }
 
-// Rental dates + quantity have their own dedicated UI (with a live
-// availability check) in CheckoutForm — this only covers the personal
-// details needed to place the reservation. There's no payment step: this
-// is a reservation request, not a checkout with real billing.
+// Personal details needed to place an order request. There's no payment
+// step and no date/quantity selection: this is a simple order request —
+// pricing and scheduling are handled by staff after the fact.
 export const FORM_SECTIONS: FormSection[] = [
   {
     icon: 'person',

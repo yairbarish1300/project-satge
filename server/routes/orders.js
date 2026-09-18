@@ -2,15 +2,9 @@ import { Router } from 'express';
 import Order from '../models/Order.js';
 import Product from '../models/Product.js';
 import { requireAuth } from '../middleware/auth.js';
-import { findFreeUnits, isValidDateRange, rentalDays, todayIso } from '../utils/availability.js';
 
 const router = Router();
 const STATUSES = ['pending', 'approved', 'completed', 'cancelled'];
-
-function formatDate(iso) {
-  const [y, m, d] = iso.split('-');
-  return `${d}/${m}/${y}`;
-}
 
 function toPublicOrder(o) {
   return {
@@ -21,16 +15,9 @@ function toPublicOrder(o) {
     customerPhone: o.customerPhone,
     company: o.company,
     productId: o.productId,
-    product: o.quantity > 1 ? `${o.productName} × ${o.quantity}` : o.productName,
-    productName: o.productName,
-    quantity: o.quantity,
-    unitNumbers: o.unitNumbers,
-    dates: `${formatDate(o.startDate)} - ${formatDate(o.endDate)}`,
-    startDate: o.startDate,
-    endDate: o.endDate,
+    product: o.productName,
     price: `₪${o.totalPrice.toLocaleString('he-IL')}`,
     totalPrice: o.totalPrice,
-    pricePerUnitPerDay: o.pricePerUnitPerDay,
     status: o.status,
     notes: o.notes,
     createdAt: o.createdAt,
@@ -47,14 +34,10 @@ async function generateOrderNumber() {
   return `#STG-${Date.now()}`;
 }
 
-// Public: submitted from the customer-facing checkout page. This is where a
-// specific product is actually reserved — it re-checks availability and
-// assigns concrete unit numbers atomically with creating the order, so two
-// customers can't be handed the same physical unit for overlapping dates.
+// Public: submitted from the customer-facing checkout page.
 router.post('/', async (req, res) => {
   try {
-    const { customerName, customerEmail, customerPhone, company, productId, quantity, startDate, endDate, notes } =
-      req.body ?? {};
+    const { customerName, customerEmail, customerPhone, company, productId, notes } = req.body ?? {};
 
     if (!customerName?.trim()) {
       return res.status(400).json({ message: 'יש למלא שם מלא' });
@@ -62,43 +45,11 @@ router.post('/', async (req, res) => {
     if (!productId) {
       return res.status(400).json({ message: 'לא נבחר מוצר להזמנה' });
     }
-    if (!isValidDateRange(startDate, endDate)) {
-      return res.status(400).json({ message: 'יש לבחור טווח תאריכים תקין' });
-    }
-    // A one-day grace window absorbs any client/server timezone drift instead
-    // of rejecting a booking the customer's own calendar considered "today".
-    const minStartDate = new Date(`${todayIso()}T00:00:00Z`);
-    minStartDate.setUTCDate(minStartDate.getUTCDate() - 1);
-    if (new Date(`${startDate}T00:00:00Z`) < minStartDate) {
-      return res.status(400).json({ message: 'לא ניתן לשריין תאריך שכבר עבר' });
-    }
-
-    const qty = Number(quantity);
-    if (!Number.isInteger(qty) || qty < 1) {
-      return res.status(400).json({ message: 'יש להזין כמות תקינה' });
-    }
 
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({ message: 'המוצר לא נמצא' });
     }
-    if (product.stockTotal === 0) {
-      return res.status(400).json({ message: 'מוצר זה אינו זמין להשכרה כרגע' });
-    }
-    if (qty > product.stockTotal) {
-      return res.status(400).json({ message: `לא ניתן להזמין יותר מ-${product.stockTotal} יחידות מהמוצר הזה` });
-    }
-
-    const freeUnits = await findFreeUnits(product._id, product.stockTotal, startDate, endDate);
-    if (freeUnits.length < qty) {
-      return res.status(409).json({
-        message: `אין מספיק יחידות פנויות בתאריכים אלו — זמינות כרגע: ${freeUnits.length} מתוך ${product.stockTotal}`,
-      });
-    }
-
-    const unitNumbers = freeUnits.slice(0, qty);
-    const days = rentalDays(startDate, endDate);
-    const totalPrice = product.price * qty * days;
 
     const order = await Order.create({
       orderNumber: await generateOrderNumber(),
@@ -108,12 +59,7 @@ router.post('/', async (req, res) => {
       company: (company ?? '').trim(),
       productId: product._id,
       productName: product.name,
-      quantity: qty,
-      unitNumbers,
-      startDate,
-      endDate,
-      pricePerUnitPerDay: product.price,
-      totalPrice,
+      totalPrice: product.price,
       notes: (notes ?? '').trim(),
     });
 
@@ -130,9 +76,6 @@ router.get('/', requireAuth, async (req, res) => {
   res.json({ orders: orders.map(toPublicOrder) });
 });
 
-// Admin edits are limited to status/notes/contact details/price override —
-// changing the reserved product, dates, or quantity would require redoing
-// the unit allocation, so that's not supported here (cancel and rebook instead).
 router.put('/:id', requireAuth, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -152,7 +95,7 @@ router.put('/:id', requireAuth, async (req, res) => {
       if (!STATUSES.includes(status)) {
         return res.status(400).json({ message: 'סטטוס לא תקין' });
       }
-      order.status = status; // setting 'cancelled' immediately frees its reserved units
+      order.status = status;
     }
 
     if (totalPrice !== undefined) {

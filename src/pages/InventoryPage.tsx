@@ -13,16 +13,25 @@ import './InventoryPage.css';
 export default function InventoryPage() {
   const { products, loading, error, deleteProduct } = useProductCatalog();
   const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [actionError, setActionError] = useState('');
 
+  const categoryOptions = useMemo(() => {
+    const categories = Array.from(new Set(products.map((p) => p.category).filter(Boolean))).sort();
+    return [{ value: 'all', label: 'כל הקטגוריות' }, ...categories.map((c) => ({ value: c, label: c }))];
+  }, [products]);
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    if (!q) return products;
-    return products.filter((item) => item.name.toLowerCase().includes(q) || item.sku.toLowerCase().includes(q));
-  }, [search, products]);
+    return products.filter((item) => {
+      if (categoryFilter !== 'all' && item.category !== categoryFilter) return false;
+      if (!q) return true;
+      return item.name.toLowerCase().includes(q) || item.sku.toLowerCase().includes(q);
+    });
+  }, [search, categoryFilter, products]);
 
   const openEdit = (product: CatalogProduct) => {
     setEditingProduct(product);
@@ -61,10 +70,13 @@ export default function InventoryPage() {
 
           <SearchableHeader
             title="Equipment List"
-            description="Search equipment, review stock levels, and manage daily rates."
+            description="Search equipment and manage daily rates."
             searchValue={search}
             onSearchChange={setSearch}
             searchPlaceholder="Search equipment ID, name..."
+            filterOptions={categoryOptions}
+            activeFilter={categoryFilter}
+            onFilterChange={setCategoryFilter}
           />
 
           {(error || actionError) && <p className="admin-error">{error || actionError}</p>}

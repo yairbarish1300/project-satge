@@ -10,8 +10,6 @@ interface ProductDetailsFieldsProps {
   categories: string[];
   price: string;
   onPriceChange: (value: string) => void;
-  stockTotal: string;
-  onStockTotalChange: (value: string) => void;
 }
 
 export default function ProductDetailsFields({
@@ -20,7 +18,6 @@ export default function ProductDetailsFields({
   description, onDescriptionChange,
   category, onCategoryChange, categories,
   price, onPriceChange,
-  stockTotal, onStockTotalChange,
 }: ProductDetailsFieldsProps) {
   return (
     <>
@@ -51,11 +48,6 @@ export default function ProductDetailsFields({
       <label className="add-product-field">
         <span>מחיר ליום (₪)</span>
         <input type="number" min="0" step="1" value={price} onChange={(e) => onPriceChange(e.target.value)} placeholder="0" />
-      </label>
-
-      <label className="add-product-field">
-        <span>כמות במלאי</span>
-        <input type="number" min="0" step="1" value={stockTotal} onChange={(e) => onStockTotalChange(e.target.value)} placeholder="0" />
       </label>
     </>
   );

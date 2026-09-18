@@ -298,6 +298,10 @@
   box-shadow: 0 0 15px rgba(34, 197, 94, 0.15);
 }
 
+.orders-filter-wrap {
+  position: relative;
+}
+
 .orders-filter-btn {
   background: #2a2a2a;
   border: 1px solid #353534;
@@ -308,6 +312,49 @@
 }
 
 .orders-filter-btn:hover { border-color: #4be277; }
+
+.orders-filter-btn.active {
+  border-color: #4be277;
+  background: rgba(75, 226, 119, 0.1);
+  color: #4be277;
+}
+
+.orders-filter-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 180px;
+  background: #1c1b1b;
+  border: 1px solid #353534;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  z-index: 60;
+}
+
+.orders-filter-option {
+  width: 100%;
+  text-align: right;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #e5e2e1;
+  font-size: 13px;
+  font-family: 'Hanken Grotesk', sans-serif;
+  cursor: pointer;
+}
+
+.orders-filter-option:hover {
+  background: rgba(75, 226, 119, 0.1);
+}
+
+.orders-filter-option.active {
+  color: #4be277;
+  font-weight: 700;
+}
 
 .orders-table-card {
   background: #0e0e0e;

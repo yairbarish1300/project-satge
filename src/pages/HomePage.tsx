@@ -19,8 +19,8 @@ export default function HomePage() {
         <SimpleFooter
           copyright="© 2024 STAGE Event Production Services"
           links={[
-            { label: 'Home', href: '#' },
-            { label: 'Shop', href: '#' },
+            { label: 'Home', href: '/' },
+            { label: 'Shop', href: '/shop' },
           ]}
         />
       </main>

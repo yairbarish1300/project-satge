@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import Product from '../models/Product.js';
 import { requireAuth } from '../middleware/auth.js';
-import { findFreeUnits, isValidDateRange } from '../utils/availability.js';
 
 const router = Router();
 
@@ -15,8 +14,6 @@ function toPublicProduct(p) {
     image: p.image,
     price: p.price,
     unit: p.unit,
-    stockTotal: p.stockTotal,
-    inStock: p.stockTotal > 0,
     tags: p.tags,
     createdAt: p.createdAt,
   };
@@ -28,28 +25,10 @@ router.get('/', async (req, res) => {
   res.json({ products: products.map(toPublicProduct) });
 });
 
-// Public: how many units of this product are free for a given date range —
-// used by the checkout page before it lets the customer submit a reservation.
-router.get('/:id/availability', async (req, res) => {
-  const { startDate, endDate } = req.query;
-
-  if (!isValidDateRange(startDate, endDate)) {
-    return res.status(400).json({ message: 'טווח תאריכים לא תקין' });
-  }
-
-  const product = await Product.findById(req.params.id);
-  if (!product) {
-    return res.status(404).json({ message: 'המוצר לא נמצא' });
-  }
-
-  const free = await findFreeUnits(product._id, product.stockTotal, startDate, endDate);
-  res.json({ stockTotal: product.stockTotal, availableUnits: free.length });
-});
-
 // Everything below is a write — any logged-in employee/manager may manage the catalog.
 router.post('/', requireAuth, async (req, res) => {
   try {
-    const { name, sku, description, category, image, price, unit, stockTotal, tags } = req.body ?? {};
+    const { name, sku, description, category, image, price, unit, tags } = req.body ?? {};
 
     if (!name?.trim() || !sku?.trim()) {
       return res.status(400).json({ message: 'יש למלא שם מוצר ו-SKU' });
@@ -58,11 +37,6 @@ router.post('/', requireAuth, async (req, res) => {
     const parsedPrice = Number(price);
     if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
       return res.status(400).json({ message: 'יש להזין מחיר תקין' });
-    }
-
-    const parsedStock = Number(stockTotal);
-    if (!Number.isFinite(parsedStock) || parsedStock < 0) {
-      return res.status(400).json({ message: 'יש להזין כמות מלאי תקינה' });
     }
 
     const existing = await Product.findOne({ sku: sku.trim() });
@@ -78,7 +52,6 @@ router.post('/', requireAuth, async (req, res) => {
       image: image || '',
       price: parsedPrice,
       unit: unit || '/ יום',
-      stockTotal: parsedStock,
       tags: Array.isArray(tags) ? tags : [],
     });
 
@@ -96,7 +69,7 @@ router.put('/:id', requireAuth, async (req, res) => {
       return res.status(404).json({ message: 'המוצר לא נמצא' });
     }
 
-    const { name, sku, description, category, image, price, unit, stockTotal, tags } = req.body ?? {};
+    const { name, sku, description, category, image, price, unit, tags } = req.body ?? {};
 
     if (sku !== undefined && sku.trim() !== product.sku) {
       const duplicate = await Product.findOne({ sku: sku.trim(), _id: { $ne: product._id } });
@@ -117,14 +90,6 @@ router.put('/:id', requireAuth, async (req, res) => {
         return res.status(400).json({ message: 'יש להזין מחיר תקין' });
       }
       product.price = parsedPrice;
-    }
-
-    if (stockTotal !== undefined) {
-      const parsedStock = Number(stockTotal);
-      if (!Number.isFinite(parsedStock) || parsedStock < 0) {
-        return res.status(400).json({ message: 'יש להזין כמות מלאי תקינה' });
-      }
-      product.stockTotal = parsedStock;
     }
 
     await product.save();

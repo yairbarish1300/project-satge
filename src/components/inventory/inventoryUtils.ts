@@ -21,9 +21,7 @@ const COLUMNS: { header: string; get: (p: CatalogProduct) => string }[] = [
   { header: 'שם מוצר', get: (p) => p.name },
   { header: 'SKU', get: (p) => p.sku },
   { header: 'קטגוריה', get: (p) => p.category },
-  { header: 'כמות במלאי', get: (p) => String(p.stockTotal) },
   { header: 'מחיר ליום (₪)', get: (p) => String(p.price) },
-  { header: 'ערך מלאי (₪)', get: (p) => String(p.price * p.stockTotal) },
 ];
 
 export function exportInventoryToCsv(products: CatalogProduct[]) {

@@ -8,13 +8,7 @@ export interface Order {
   customerPhone?: string;
   company: string;
   productId?: string;
-  productName?: string;
-  quantity?: number;
-  unitNumbers?: number[]; // the personal unit identifiers reserved for this order
-  product: string; // display text, e.g. "JBL V20 × 2"
-  dates: string;
-  startDate?: string;
-  endDate?: string;
+  product: string; // product name
   price: string;
   totalPrice?: number;
   status: OrderStatus;

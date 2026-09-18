@@ -32,7 +32,6 @@ const CSV_COLUMNS: { header: string; get: (o: Order) => string }[] = [
   { header: 'טלפון', get: (o) => o.customerPhone ?? '' },
   { header: 'חברה', get: (o) => o.company },
   { header: 'מוצר', get: (o) => o.product },
-  { header: 'תאריכים', get: (o) => o.dates },
   { header: 'סכום', get: (o) => o.price },
   { header: 'סטטוס', get: (o) => statusLabel(o.status) },
 ];
@@ -62,7 +61,6 @@ export function exportOrdersToPdf(orders: Order[]) {
         <td>${o.customer}</td>
         <td>${o.company || '—'}</td>
         <td>${o.product}</td>
-        <td>${o.dates}</td>
         <td>${o.price}</td>
         <td>${statusLabel(o.status)}</td>
       </tr>`,
@@ -89,7 +87,7 @@ export function exportOrdersToPdf(orders: Order[]) {
         <p>${new Date().toLocaleDateString('he-IL')} · ${orders.length} הזמנות</p>
         <table>
           <thead>
-            <tr><th>הזמנה</th><th>לקוח</th><th>חברה</th><th>מוצר</th><th>תאריכים</th><th>סכום</th><th>סטטוס</th></tr>
+            <tr><th>הזמנה</th><th>לקוח</th><th>חברה</th><th>מוצר</th><th>סכום</th><th>סטטוס</th></tr>
           </thead>
           <tbody>${rowsHtml}</tbody>
         </table>

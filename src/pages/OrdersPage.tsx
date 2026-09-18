@@ -7,7 +7,7 @@ import OrdersTable from '../components/orders/OrdersTable';
 import OrderEditPanel from '../components/orders/OrderEditPanel';
 import RecentActivity from '../components/orders/RecentActivity';
 import QuickFiltersPanel from '../components/orders/QuickFiltersPanel';
-import { type Order, type OrderStatus } from '../components/orders/ordersData';
+import { STATUS_FILTERS, type Order, type OrderStatus } from '../components/orders/ordersData';
 import { API_BASE, authHeader, useAuth } from '../context/AuthContext';
 import './OrdersPage.css';
 
@@ -134,6 +134,9 @@ export default function OrdersPage() {
             searchValue={search}
             onSearchChange={setSearch}
             searchPlaceholder="Search order ID, customer..."
+            filterOptions={STATUS_FILTERS}
+            activeFilter={statusFilter}
+            onFilterChange={(value) => setStatusFilter(value as OrderStatus | 'all')}
           />
 
           {!loading && <StatsGrid stats={buildStatTiles(orders)} />}

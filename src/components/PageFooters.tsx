@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import './PageFooters.css';
 
 type FooterLink = {
@@ -11,12 +12,23 @@ type SimpleFooterProps = {
 };
 
 export function SimpleFooter({ copyright, links }: SimpleFooterProps) {
+  const navigate = useNavigate();
+
   return (
     <footer className="rp-footer">
       <div className="rp-muted">{copyright}</div>
       <div className="rp-footer-group">
         {links.map((link) => (
-          <a key={link.label} href={link.href} className="rp-footer-link">
+          <a
+            key={link.label}
+            href={link.href}
+            className="rp-footer-link"
+            onClick={(e) => {
+              if (!link.href.startsWith('/')) return;
+              e.preventDefault();
+              navigate(link.href);
+            }}
+          >
             {link.label}
           </a>
         ))}
@@ -30,13 +42,21 @@ type AdminFooterProps = {
 };
 
 export function AdminFooter({ copyright }: AdminFooterProps) {
+  const navigate = useNavigate();
+
   return (
     <footer className="admin-footer">
       <div className="admin-footer-copy">{copyright}</div>
       <div className="admin-footer-links">
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
-        <a href="#">Contact Support</a>
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            navigate('/contact');
+          }}
+        >
+          צור קשר
+        </a>
       </div>
     </footer>
   );

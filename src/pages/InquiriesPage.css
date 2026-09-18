@@ -1,0 +1,10 @@
+@import './AdminCommon.css';
+
+.inquiry-message {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #bccbb9;
+  font-size: 13px;
+}

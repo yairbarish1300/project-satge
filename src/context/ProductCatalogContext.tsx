@@ -9,10 +9,8 @@ export type CatalogProduct = {
   description: string;
   category: string;
   image: string;
-  price: number; // per unit, per day
+  price: number;
   unit: string;
-  inStock: boolean; // the business owns at least one unit (stockTotal > 0)
-  stockTotal: number; // total fleet size — real per-date availability is checked separately
   tags: string[];
 };
 
@@ -24,13 +22,10 @@ export type NewCatalogProductInput = {
   image?: string;
   price: number;
   unit?: string;
-  stockTotal: number;
   tags: string[];
 };
 
 export type UpdateCatalogProductInput = Partial<NewCatalogProductInput>;
-
-export type AvailabilityResult = { stockTotal: number; availableUnits: number };
 
 type ProductCatalogContextType = {
   products: CatalogProduct[];
@@ -39,7 +34,6 @@ type ProductCatalogContextType = {
   addProduct: (input: NewCatalogProductInput) => Promise<void>;
   updateProduct: (id: string, input: UpdateCatalogProductInput) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
-  checkAvailability: (productId: string, startDate: string, endDate: string) => Promise<AvailabilityResult>;
   refresh: () => Promise<void>;
 };
 
@@ -122,16 +116,9 @@ export function ProductCatalogProvider({ children }: { children: ReactNode }) {
     [token],
   );
 
-  const checkAvailability = useCallback(async (productId: string, startDate: string, endDate: string) => {
-    const params = new URLSearchParams({ startDate, endDate });
-    const res = await fetch(`${API_BASE}/products/${productId}/availability?${params.toString()}`);
-    if (!res.ok) throw new Error(await extractErrorMessage(res, 'בדיקת הזמינות נכשלה'));
-    return (await res.json()) as AvailabilityResult;
-  }, []);
-
   const value = useMemo<ProductCatalogContextType>(
-    () => ({ products, loading, error, addProduct, updateProduct, deleteProduct, checkAvailability, refresh }),
-    [products, loading, error, addProduct, updateProduct, deleteProduct, checkAvailability, refresh],
+    () => ({ products, loading, error, addProduct, updateProduct, deleteProduct, refresh }),
+    [products, loading, error, addProduct, updateProduct, deleteProduct, refresh],
   );
 
   return <ProductCatalogContext.Provider value={value}>{children}</ProductCatalogContext.Provider>;

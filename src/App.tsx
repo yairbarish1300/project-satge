@@ -10,6 +10,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import EmployeesPage from './pages/EmployeesPage';
 import SettingsPage from './pages/SettingsPage';
+import ContactPage from './pages/ContactPage';
+import InquiriesPage from './pages/InquiriesPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { ProductCatalogProvider } from './context/ProductCatalogContext';
@@ -63,6 +65,15 @@ function AppLayout() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/inquiries"
+          element={
+            <ProtectedRoute>
+              <InquiriesPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/product" element={<ProductPage />} />
         <Route path="*" element={<HomePage />} />

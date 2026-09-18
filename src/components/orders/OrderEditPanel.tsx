@@ -23,7 +23,7 @@ const STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
   { value: 'pending', label: 'ממתין' },
   { value: 'approved', label: 'מאושר' },
   { value: 'completed', label: 'הושלם' },
-  { value: 'cancelled', label: 'בוטל (משחרר את היחידות המשוריינות)' },
+  { value: 'cancelled', label: 'בוטל' },
 ];
 
 export default function OrderEditPanel({ order, onClose, onSave }: OrderEditPanelProps) {
@@ -94,7 +94,7 @@ export default function OrderEditPanel({ order, onClose, onSave }: OrderEditPane
         <div className="add-product-head">
           <div>
             <h3>עריכת הזמנה {order.id}</h3>
-            <p>פרטי השריון אינם ניתנים לעריכה — ניתן לבטל את ההזמנה כדי לשחרר את היחידות ולשריין מחדש.</p>
+            <p>המוצר המוזמן אינו ניתן לשינוי — ניתן לבטל את ההזמנה ולפתוח הזמנה חדשה במקומה.</p>
           </div>
           <button className="add-product-close" onClick={closePanel} aria-label="Close panel">
             <span className="msym">close</span>
@@ -103,14 +103,8 @@ export default function OrderEditPanel({ order, onClose, onSave }: OrderEditPane
 
         <div className="add-product-body">
           <div className="add-product-field add-product-field-full order-reserved-summary">
-            <span>פרטי השריון (קבוע)</span>
-            <p>
-              {order.productName ?? order.product}
-              {order.quantity && order.quantity > 1 ? ` × ${order.quantity}` : ''}
-              {order.unitNumbers?.length ? ` — יחידות #${order.unitNumbers.join(', #')}` : ''}
-              <br />
-              {order.dates}
-            </p>
+            <span>מוצר (קבוע)</span>
+            <p>{order.product}</p>
           </div>
 
           <label className="add-product-field">

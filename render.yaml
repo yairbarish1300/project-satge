@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: stage-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run server
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false

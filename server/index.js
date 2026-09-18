@@ -8,6 +8,7 @@ import productRoutes from './routes/products.js';
 import orderRoutes from './routes/orders.js';
 import dashboardRoutes from './routes/dashboard.js';
 import categoryRoutes from './routes/categories.js';
+import inquiryRoutes from './routes/inquiries.js';
 
 const app = express();
 const PORT = process.env.PORT || 5050;
@@ -21,6 +22,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/inquiries', inquiryRoutes);
 
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 

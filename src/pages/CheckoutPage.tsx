@@ -8,13 +8,6 @@ import CommitmentsList from '../components/checkout/CommitmentsList';
 import { useProductCatalog } from '../context/ProductCatalogContext';
 import './CheckoutPage.css';
 
-function rentalDays(startDate: string, endDate: string): number {
-  if (!startDate || !endDate || startDate > endDate) return 0;
-  const start = new Date(`${startDate}T00:00:00Z`).getTime();
-  const end = new Date(`${endDate}T00:00:00Z`).getTime();
-  return Math.max(1, Math.round((end - start) / 86400000) + 1);
-}
-
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -22,16 +15,7 @@ export default function CheckoutPage() {
   const { products, loading } = useProductCatalog();
 
   const product = useMemo(() => products.find((p) => p.id === productId) ?? null, [products, productId]);
-
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [quantity, setQuantity] = useState(1);
   const [completedOrderNumber, setCompletedOrderNumber] = useState<string | null>(null);
-
-  const days = rentalDays(startDate, endDate);
-  // Only a real ₪ figure once there's an actual date range — showing a
-  // "1 day" price before any dates are chosen implied a total that wasn't real.
-  const totalPrice = product && days > 0 ? product.price * quantity * days : 0;
 
   return (
     <div className="checkout-page">
@@ -45,7 +29,7 @@ export default function CheckoutPage() {
             <span className="msym">check_circle</span>
             <h2>ההזמנה נשלחה בהצלחה!</h2>
             <p>מספר ההזמנה שלך: <strong>{completedOrderNumber}</strong></p>
-            <p>ניצור איתך קשר בקרוב לתיאום ההגעה והתשלום הסופי.</p>
+            <p>ניצור איתך קשר בקרוב לתיאום הפרטים והתשלום הסופי.</p>
             <button type="button" className="checkout-submit" onClick={() => navigate('/')}>
               <span>חזרה לדף הבית</span>
             </button>
@@ -62,22 +46,11 @@ export default function CheckoutPage() {
         ) : (
           <div className="checkout-grid">
             <div className="checkout-form-col">
-              <CheckoutForm
-                product={product}
-                startDate={startDate}
-                endDate={endDate}
-                quantity={quantity}
-                days={days}
-                totalPrice={totalPrice}
-                onStartDateChange={setStartDate}
-                onEndDateChange={setEndDate}
-                onQuantityChange={setQuantity}
-                onOrderCreated={setCompletedOrderNumber}
-              />
+              <CheckoutForm product={product} onOrderCreated={setCompletedOrderNumber} />
             </div>
 
             <div className="checkout-aside-col">
-              <OrderSummaryCard product={product} quantity={quantity} days={days} totalPrice={totalPrice} />
+              <OrderSummaryCard product={product} />
               <CommitmentsList />
             </div>
           </div>

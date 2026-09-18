@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AddProductPanel from './AddProductPanel';
 import { useAuth } from '../context/AuthContext';
 
-type AdminSection = 'inventory' | 'orders' | 'dashboard' | 'employees';
+type AdminSection = 'inventory' | 'orders' | 'dashboard' | 'employees' | 'inquiries';
 
 type AdminSidebarProps = {
   active: AdminSection;
@@ -41,6 +41,10 @@ export default function AdminSidebar({ active }: AdminSidebarProps) {
         <div className={`admin-nav-item ${active === 'dashboard' ? 'active' : ''}`} onClick={() => navigate('/dashboard')}>
           <span className="msym">edit_calendar</span>
           <span>Manage Products</span>
+        </div>
+        <div className={`admin-nav-item ${active === 'inquiries' ? 'active' : ''}`} onClick={() => navigate('/inquiries')}>
+          <span className="msym">mail</span>
+          <span>פניות שהתקבלו</span>
         </div>
         {isManager && (
           <div className={`admin-nav-item ${active === 'employees' ? 'active' : ''}`} onClick={() => navigate('/employees')}>

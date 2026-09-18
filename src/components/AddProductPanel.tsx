@@ -24,7 +24,6 @@ export default function AddProductPanel({ open, onClose, editingProduct = null }
   const [sku, setSku] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [stockTotal, setStockTotal] = useState('');
   const [category, setCategory] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [imageData, setImageData] = useState('');
@@ -39,7 +38,6 @@ export default function AddProductPanel({ open, onClose, editingProduct = null }
       setSku(editingProduct.sku);
       setDescription(editingProduct.description);
       setPrice(String(editingProduct.price));
-      setStockTotal(String(editingProduct.stockTotal));
       setCategory(editingProduct.category);
       setTags(editingProduct.tags);
       setImageData(editingProduct.image);
@@ -48,7 +46,6 @@ export default function AddProductPanel({ open, onClose, editingProduct = null }
       setSku('');
       setDescription('');
       setPrice('');
-      setStockTotal('');
       setCategory(branchCategories[0] || '');
       setTags([]);
       setImageData('');
@@ -75,7 +72,6 @@ export default function AddProductPanel({ open, onClose, editingProduct = null }
 
   const onSubmit = async () => {
     const parsedPrice = Number(price);
-    const parsedStock = Number(stockTotal);
 
     if (!name.trim() || !sku.trim() || !description.trim()) {
       setError('יש למלא שם מוצר, SKU ותיאור.');
@@ -87,10 +83,6 @@ export default function AddProductPanel({ open, onClose, editingProduct = null }
     }
     if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
       setError('יש להזין מחיר יומי תקין.');
-      return;
-    }
-    if (!Number.isFinite(parsedStock) || parsedStock < 0) {
-      setError('יש להזין כמות מלאי תקינה.');
       return;
     }
 
@@ -105,7 +97,6 @@ export default function AddProductPanel({ open, onClose, editingProduct = null }
           category,
           image: imageData,
           price: parsedPrice,
-          stockTotal: parsedStock,
           tags,
         });
       } else {
@@ -116,7 +107,6 @@ export default function AddProductPanel({ open, onClose, editingProduct = null }
           category,
           image: imageData,
           price: parsedPrice,
-          stockTotal: parsedStock,
           tags,
         });
       }
@@ -150,7 +140,6 @@ export default function AddProductPanel({ open, onClose, editingProduct = null }
             description={description} onDescriptionChange={setDescription}
             category={category} onCategoryChange={setCategory} categories={branchCategories}
             price={price} onPriceChange={setPrice}
-            stockTotal={stockTotal} onStockTotalChange={setStockTotal}
           />
 
           <TagInput tags={tags} onChange={setTags} />

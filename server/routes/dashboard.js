@@ -2,7 +2,6 @@ import { Router } from 'express';
 import Product from '../models/Product.js';
 import Order from '../models/Order.js';
 import { requireAuth } from '../middleware/auth.js';
-import { todayIso } from '../utils/availability.js';
 
 const router = Router();
 
@@ -10,20 +9,9 @@ const router = Router();
 // admin dashboard's stat tiles instead of the placeholder figures it used to ship with.
 router.get('/stats', requireAuth, async (req, res) => {
   try {
-    const products = await Product.find().select('stockTotal');
-    const totalUnits = products.reduce((sum, p) => sum + p.stockTotal, 0);
-    const productCount = products.length;
-
+    const productCount = await Product.countDocuments();
     const activeOrdersCount = await Order.countDocuments({ status: { $in: ['pending', 'approved'] } });
-
-    const today = todayIso();
-    const inUseOrders = await Order.find({
-      status: { $in: ['pending', 'approved', 'completed'] },
-      startDate: { $lte: today },
-      endDate: { $gte: today },
-    }).select('quantity');
-    const unitsInUse = inUseOrders.reduce((sum, o) => sum + o.quantity, 0);
-    const inUsePercent = totalUnits > 0 ? Math.round((unitsInUse / totalUnits) * 100) : 0;
+    const pendingOrdersCount = await Order.countDocuments({ status: 'pending' });
 
     const now = new Date();
     const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
@@ -34,11 +22,9 @@ router.get('/stats', requireAuth, async (req, res) => {
     const revenueThisMonth = monthOrders.reduce((sum, o) => sum + o.totalPrice, 0);
 
     res.json({
-      totalUnits,
       productCount,
       activeOrdersCount,
-      unitsInUse,
-      inUsePercent,
+      pendingOrdersCount,
       revenueThisMonth,
       monthOrdersCount: monthOrders.length,
     });

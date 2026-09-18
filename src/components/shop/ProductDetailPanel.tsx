@@ -25,7 +25,6 @@ export default function ProductDetailPanel({ product, onClose, onOrder }: Produc
 
           <div className="rp-product-panel-meta">
             <p><strong>קטגוריה:</strong> {product.category}</p>
-            <p><strong>סה"כ יחידות בפארק הציוד:</strong> {product.stockTotal}</p>
             <p><strong>מחיר:</strong> ₪ {product.price} {product.unit}</p>
           </div>
 
@@ -34,9 +33,7 @@ export default function ProductDetailPanel({ product, onClose, onOrder }: Produc
           ) : null}
 
           <div className="rp-product-panel-actions">
-            <button className="rp-product-order-btn" disabled={!product.inStock} onClick={onOrder}>
-              {product.inStock ? 'הזמן' : 'חסר במלאי'}
-            </button>
+            <button className="rp-product-order-btn" onClick={onOrder}>הזמן</button>
           </div>
         </div>
       </section>

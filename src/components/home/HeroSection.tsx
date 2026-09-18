@@ -13,7 +13,7 @@ export default function HeroSection() {
       </p>
       <div className="rp-cta-row">
         <button className="rp-btn-primary" onClick={() => navigate('/shop')}>מעבר לחנות הציוד</button>
-        <a className="rp-btn-secondary" href="mailto:rentals@stage-events.com">צרו קשר לייעוץ</a>
+        <button className="rp-btn-secondary" onClick={() => navigate('/contact')}>צרו קשר לייעוץ</button>
       </div>
     </section>
   );

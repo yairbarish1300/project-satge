@@ -19,7 +19,6 @@ export default function OrdersTable({ orders, selectedId, onSelect, onEdit, onDe
             <tr>
               <th>Order</th>
               <th>Company & Product</th>
-              <th>Dates</th>
               <th className="ta-right">Total</th>
               <th className="ta-center">Status</th>
               <th className="ta-center">Actions</th>
@@ -39,12 +38,8 @@ export default function OrdersTable({ orders, selectedId, onSelect, onEdit, onDe
                 </td>
                 <td>
                   <p className="orders-company">{order.company || '—'}</p>
-                  <p className="orders-product">
-                    {order.product}
-                    {order.unitNumbers?.length ? ` (יח' #${order.unitNumbers.join(', #')})` : ''}
-                  </p>
+                  <p className="orders-product">{order.product}</p>
                 </td>
-                <td><span className="orders-date-pill">{order.dates}</span></td>
                 <td className="ta-right"><span className="orders-price">{order.price}</span></td>
                 <td className="ta-center">
                   <span className={`orders-status ${statusClass(order.status)}`}>

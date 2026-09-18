@@ -29,7 +29,6 @@ export default function ProductGrid({ products, onSelect }: ProductGridProps) {
             <p>{p.description}</p>
             <div className="rp-cta-row rp-between-row">
               <span className="price">₪ {p.price} {p.unit}</span>
-              <span className={`rp-tag ${p.inStock ? 'in' : 'out'}`}>{p.inStock ? 'במלאי' : 'חסר מלאי'}</span>
             </div>
             {p.tags.length ? <p className="rp-product-tags">{p.tags.map((tag) => `#${tag}`).join(' ')}</p> : null}
           </div>

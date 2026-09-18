@@ -11,11 +11,9 @@ import { API_BASE, authHeader, useAuth } from '../context/AuthContext';
 import './DashboardPage.css';
 
 interface DashboardStats {
-  totalUnits: number;
   productCount: number;
   activeOrdersCount: number;
-  unitsInUse: number;
-  inUsePercent: number;
+  pendingOrdersCount: number;
   revenueThisMonth: number;
   monthOrdersCount: number;
 }
@@ -23,9 +21,9 @@ interface DashboardStats {
 function buildStatTiles(stats: DashboardStats): AdminStat[] {
   return [
     {
-      label: 'מוצרים במלאי',
+      label: 'מוצרים בקטלוג',
       value: stats.productCount.toLocaleString('he-IL'),
-      sub: `${stats.totalUnits.toLocaleString('he-IL')} יחידות בסה"כ`,
+      sub: 'סה"כ מוצרים פעילים',
       subClass: 'primary',
     },
     {
@@ -35,10 +33,10 @@ function buildStatTiles(stats: DashboardStats): AdminStat[] {
       subClass: 'secondary',
     },
     {
-      label: 'ציוד בשימוש היום',
-      value: `${stats.inUsePercent}%`,
-      sub: `${stats.unitsInUse.toLocaleString('he-IL')} מתוך ${stats.totalUnits.toLocaleString('he-IL')} יחידות`,
-      subClass: 'muted',
+      label: 'ממתינות לאישור',
+      value: stats.pendingOrdersCount.toLocaleString('he-IL'),
+      sub: 'דורש פעולה',
+      subClass: 'tertiary',
     },
     {
       label: 'הכנסות החודש',

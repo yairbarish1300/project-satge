@@ -4,7 +4,7 @@ import { useProductCatalog } from '../context/ProductCatalogContext';
 import './Header.css';
 
 interface HeaderProps {
-  currentPage?: 'home' | 'shop' | 'inventory' | 'orders' | 'dashboard' | 'login' | 'checkout' | 'product';
+  currentPage?: 'home' | 'shop' | 'inventory' | 'orders' | 'dashboard' | 'login' | 'checkout' | 'product' | 'contact';
   showSearch?: boolean;
   searchValue?: string;
   onSearchChange?: (value: string) => void;

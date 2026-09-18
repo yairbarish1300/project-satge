@@ -1,0 +1,16 @@
+/* Reuses the Checkout page's dark form/section/input/button visual system. */
+@import './CheckoutPage.css';
+
+.contact-main {
+  max-width: 720px;
+}
+
+.contact-form-wrap {
+  width: 100%;
+}
+
+.contact-textarea {
+  resize: vertical;
+  min-height: 96px;
+  font-family: 'Hanken Grotesk', sans-serif;
+}
